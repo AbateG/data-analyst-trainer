@@ -22,8 +22,7 @@ jobs:
     steps:
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        # If first run still 404s, manually enable Pages in repo Settings > Pages (Source: GitHub Actions), then re-run.
 
       - name: Checkout
         uses: actions/checkout@v4
