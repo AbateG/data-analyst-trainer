@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Vite site to GitHub Pages
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   pages: write
   id-token: write
 
-# NOTE: Workflow inspected; configuration appears current for building and deploying Vite site with SPA fallback.
+# First deploy may 404 until Pages is enabled once in Settings > Pages (Source: GitHub Actions). After that, re-run.
 
 concurrency:
   group: 'pages'
@@ -20,10 +20,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        # If first run still 404s, manually enable Pages in repo Settings > Pages (Source: GitHub Actions), then re-run.
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -33,16 +29,17 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install deps
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build site
         run: npm run build
 
-      - name: SPA fallback (copy index.html to 404.html)
-        run: cp dist/index.html dist/404.html
+      - name: Create SPA 404 fallback
+        run: |
+          cp dist/index.html dist/404.html
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -54,6 +51,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
