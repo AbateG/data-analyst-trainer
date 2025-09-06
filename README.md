@@ -207,15 +207,23 @@ They render with `<code>` + automatic syntax highlighting pass (generic tokeniza
 
 ## Deployment (GitHub Pages)
 
-This project is pre-configured for GitHub Pages at:
+This project is configured for GitHub Pages at:
 `https://abateg.github.io/data-analyst-trainer/`
 
-Workflow file: `.github/workflows/deploy.yml` builds on every push to `main` and publishes `dist/`.
+Workflow file: `.github/workflows/deploy-pages.yml` builds on every push to `main` and publishes `dist/` using the GitHub Pages Actions pipeline.
 
 ### One-time GitHub setup
-1. Push repo to GitHub (main branch).
-2. In GitHub: Settings → Pages → Build and deployment → Source: GitHub Actions (should auto-detect).
-3. Wait for the `Deploy to GitHub Pages` workflow to finish (Actions tab).
+1. Push repo to GitHub (done).
+2. In GitHub: Settings → Pages → Build and deployment → Source: GitHub Actions (should already be selected automatically after first successful run).
+3. Push (or re‑push) to `main` to trigger the workflow. Watch progress under Actions → Deploy to GitHub Pages.
+4. After it completes, visit the URL above (may take 1–2 minutes to propagate).
+
+Quick redeploy (local terminal):
+```powershell
+git add .
+git commit -m "chore: content tweak" # skip if no changes
+git push origin main
+```
 
 ### Local development
 ```powershell
@@ -224,27 +232,31 @@ npm run dev
 Visit: `http://localhost:5173/data-analyst-trainer/` (Vite dev server injects `base`).
 
 ### Manual deployment trigger
-You can also run the workflow manually: Actions → Deploy to GitHub Pages → Run workflow.
+Actions → Deploy to GitHub Pages → Run workflow (workflow_dispatch is enabled).
 
 ### Custom domain (optional)
-Add a `CNAME` file inside `public/` with your domain (e.g. `trainer.example.com`) before pushing; Pages will honor it.
+Add a `CNAME` file inside `public/` with your domain (e.g. `trainer.example.com`) before pushing; the workflow will include it in `dist`. Keep only the bare domain (no protocol). After DNS (CNAME) points to `<username>.github.io`, Pages will use it.
+
+### SPA deep link fallback
+The workflow copies `dist/index.html` to `dist/404.html` so direct navigation to nested routes loads the React app instead of a GitHub 404.
 
 ### How base path works
-`vite.config.ts` sets `base` to `'/data-analyst-trainer/'`. Router uses `basename={import.meta.env.BASE_URL}` so internal links work when hosted under the subpath.
+`vite.config.ts` sets `base` to `'/data-analyst-trainer/'`. Use that for `<BrowserRouter basename={import.meta.env.BASE_URL}>` (if not already) so internal links resolve correctly under the subpath. If you later move to a custom domain, you can override by setting env `GH_PAGES_BASE=/` in the workflow or adjusting `vite.config.ts`.
 
 ### Cache busting
-Vite already fingerprints assets. If you change only content, a push invalidates the pages build automatically.
+Vite fingerprints assets. A new push invalidates old bundles automatically; use a hard refresh (Ctrl+F5) if the browser caches aggressively.
 
 ### Troubleshooting
 | Symptom | Fix |
 |---------|-----|
-| 404 on refresh of a nested route | Ensure BrowserRouter basename matches; Pages static hosting can't rewrite; keep routes client-side only. |
-| Old assets still loading | Hard refresh (Ctrl+F5) or clear cache; GitHub CDN may need a minute. |
-| Workflow fails at build | Run `npm ci && npm run build` locally to reproduce; confirm Node 20 compatibility. |
-| Blank page (JS error) | Check console for incorrect `base`; verify `window.__vite_plugin_react_preamble_installed__` not duplicated. |
+| 404 on refresh of a nested route | Ensure 404.html is produced (workflow step) and base path matches repo name. |
+| Old assets still loading | Hard refresh or wait a minute for CDN; confirm new commit hash appears in JS file names. |
+| Workflow fails at build | Reproduce locally: `npm ci && npm run build`; check Node version (uses 20). |
+| Blank page (JS error) | Check console; verify `base` matches deployment path and no script 404s. |
+| Custom domain ignored | Ensure `public/CNAME` exists with only the domain and DNS CNAME points to `<user>.github.io`. |
 
 ### Deploy from a different branch (optional)
-If you prefer a `release` branch, change the `on.push.branches` in `deploy.yml` and push there.
+If you prefer a `release` branch, edit `on.push.branches` in `.github/workflows/deploy-pages.yml` and push there.
 
 ---
 Happy learning & iterating! Contributions welcome—open an issue for feature ideas.
