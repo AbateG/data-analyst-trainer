@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2025-09-06T22:01:09.846Z",
+  "competencies": {
+    "investigation": {
+      "earned": 0,
+      "possible": 223,
+      "completedIds": [],
+      "pct": 0
+    },
+    "cloud-tools": {
+      "earned": 0,
+      "possible": 75,
+      "completedIds": [],
+      "pct": 0
+    },
+    "flow-mapping": {
+      "earned": 0,
+      "possible": 161,
+      "completedIds": [],
+      "pct": 0
+    },
+    "transformation-quality": {
+      "earned": 0,
+      "possible": 346,
+      "completedIds": [],
+      "pct": 0
+    },
+    "performance-optimization": {
+      "earned": 0,
+      "possible": 109,
+      "completedIds": [],
+      "pct": 0
+    },
+    "api-validation": {
+      "earned": 0,
+      "possible": 33,
+      "completedIds": [],
+      "pct": 0
+    },
+    "monitoring-alerting": {
+      "earned": 0,
+      "possible": 147,
+      "completedIds": [],
+      "pct": 0
+    },
+    "communication": {
+      "earned": 0,
+      "possible": 56,
+      "completedIds": [],
+      "pct": 0
+    },
+    "automation": {
+      "earned": 0,
+      "possible": 253,
+      "completedIds": [],
+      "pct": 0
+    },
+    "anomaly-detection": {
+      "earned": 0,
+      "possible": 96,
+      "completedIds": [],
+      "pct": 0
+    }
+  }
+}

@@ -1,0 +1,12 @@
+.python-runner {
+    margin-bottom: 2rem;
+}
+
+.output-container {
+    margin-top: 1rem;
+    background-color: #f4f4f4;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
