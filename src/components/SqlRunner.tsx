@@ -84,7 +84,7 @@ const SqlRunner: React.FC<SqlRunnerProps> = ({ challenge, strictModeDefault=fals
 
   // Reusable builder to allow unit tests to verify challenge solutions.
   // Exported below.
-  async function buildChallengeDbInternal(challengeObj:any){
+  const buildChallengeDbInternal = useCallback(async (challengeObj:any) => {
     const SQL = await initSqlJs({ locateFile: (file: string) => `https://sql.js.org/dist/${file}` });
     const newDb = new SQL.Database();
     // 1. Create explicit schema tables (if provided)
@@ -113,12 +113,12 @@ const SqlRunner: React.FC<SqlRunnerProps> = ({ challenge, strictModeDefault=fals
       } catch {/* ignore */}
     });
     return newDb;
-  }
+  }, []);
 
   const initDb = useCallback(async () => {
     try { const newDb = await buildChallengeDbInternal(challenge); setDb(newDb); }
     catch(e:any){ setError(e.message); }
-  }, [challenge]);
+  }, [challenge, buildChallengeDbInternal]);
 
   // Init DB on challenge change (after initDb is defined)
   useEffect(()=>{ initDb(); }, [challenge.id, initDb]);
@@ -139,7 +139,7 @@ const SqlRunner: React.FC<SqlRunnerProps> = ({ challenge, strictModeDefault=fals
     }
     if(!challenge.schema?.tables) return null;
     return challenge.schema.tables.map((t:any)=>({ name:t.name, ddl:(t.ddl || synthesizeDDL(t)) }));
-  }, [challenge.schema]);
+  }, [challenge]);
 
   const verifyResults = (userResults:any[][], expectedResults:any[][]) => {
     if(!userResults || !expectedResults) return { isCorrect:false, message:'No results to verify' };

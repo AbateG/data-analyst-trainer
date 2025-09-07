@@ -6,6 +6,7 @@
   - Security heuristic: error if forbidden imports (os, sys, subprocess, urllib, requests, open()
 */
 import { pythonChallenges } from '../src/challenges/python';
+import type { PythonChallenge } from '../src/challenges/types.ts';
 
 interface Issue { level:'ERROR'|'WARN'; id?:number; msg:string }
 
@@ -15,7 +16,7 @@ const NON_DETERMINISTIC = [/datetime\.utcnow\s*\(/, /random\./, /time\.time\s*\(
 function main(){
   const issues: Issue[] = [];
   const ids = new Set<number>();
-  for(const ch of pythonChallenges as any[]){
+  for(const ch of pythonChallenges as PythonChallenge[]){
     if(ids.has(ch.id)) issues.push({ level:'ERROR', id:ch.id, msg:'Duplicate id'}); else ids.add(ch.id);
     if(!ch.question) issues.push({ level:'ERROR', id:ch.id, msg:'Missing question'});
     if(!ch.solution) issues.push({ level:'ERROR', id:ch.id, msg:'Missing solution'});

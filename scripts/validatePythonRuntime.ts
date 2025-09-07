@@ -6,7 +6,9 @@ import { runAllPythonChallenges } from '../src/utils/pythonHeadlessRunner';
   const heavyTags = new Set(['boto3','aws']);
   const start = Date.now();
   const results = await runAllPythonChallenges(ch => {
-    const tags: string[] = (ch as any).tags || [];
+    const tags = Array.isArray((ch as unknown as { tags?: unknown }).tags)
+      ? ((ch as unknown as { tags?: string[] }).tags as string[])
+      : [];
     return !tags.some(t => heavyTags.has(t));
   });
   const duration = Date.now() - start;

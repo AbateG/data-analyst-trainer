@@ -10,6 +10,8 @@ import { challengeCompetencies } from '../src/challenges/taxonomy.ts';
 
 interface Issue { level: 'ERROR' | 'WARN'; msg: string; id?: number }
 
+interface ChallengeAggregate { id:number; question?:string; solution?:string; difficulty?:string; tags?:string[]; _type:'conceptual'|'python'|'sql' }
+
 function validateNonEmpty(field: string, value: any, id: number, issues: Issue[]) {
   if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
     issues.push({ level: 'ERROR', msg: `${field} missing`, id });
@@ -38,17 +40,17 @@ function main() {
   console.log('Starting challenge validation...');
   const issues: Issue[] = [];
 
-  const all = [
-    ...conceptualChallenges.map(c => ({ ...c, _type: 'conceptual' })),
-    ...pythonChallenges.map(c => ({ ...c, _type: 'python' })),
-    ...sqlChallenges.map(c => ({ ...c, _type: 'sql' })),
+  const all: ChallengeAggregate[] = [
+    ...conceptualChallenges.map(c => ({ ...c, _type: 'conceptual' as const })),
+    ...pythonChallenges.map(c => ({ ...c, _type: 'python' as const })),
+    ...sqlChallenges.map(c => ({ ...c, _type: 'sql' as const })),
   ];
     // Dedupe IDs within each challenge type (IDs are allowed to overlap across domains)
     const byType: Record<string, number[]> = { conceptual: [], python: [], sql: [] };
     for (const a of all) byType[a._type].push(a.id);
     for (const [, ids] of Object.entries(byType)) dedupeIds(ids, issues);
 
-  for (const ch of all as any[]) {
+  for (const ch of all) {
     validateNonEmpty('id', ch.id, ch.id, issues);
     validateNonEmpty('question', ch.question, ch.id, issues);
     validateNonEmpty('solution', ch.solution, ch.id, issues);
@@ -83,6 +85,5 @@ try {
 } catch (e) {
   console.error('Unhandled exception during validation:', e);
   // Ensure non-zero exit for CI
-  // @ts-ignore
   if (typeof process !== 'undefined') process.exit(1);
 }
