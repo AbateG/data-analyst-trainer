@@ -1,0 +1,44 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to create a release from (e.g., v0.2.0)'
+        required: true
+      generate_notes:
+        description: 'Auto-generate GitHub release notes'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate tag exists
+        run: |
+          git fetch --tags
+          if ! git rev-parse ${{ github.event.inputs.tag }} >/dev/null 2>&1; then
+            echo "Tag not found"; exit 1; fi
+      - name: Read changelog section
+        id: changelog
+        run: |
+          TAG=${{ github.event.inputs.tag }}
+          awk '/^## +\['TAG'\]/{flag=1;next}/^## +\[/{flag=0}flag' CHANGELOG.md > section.txt || true
+          echo 'section<<EOF' >> $GITHUB_OUTPUT
+          cat section.txt >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: Release ${{ github.event.inputs.tag }}
+          body: ${{ steps.changelog.outputs.section }}
+          generate_release_notes: ${{ github.event.inputs.generate_notes }}
