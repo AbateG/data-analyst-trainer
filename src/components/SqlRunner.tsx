@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
 import initSqlJs from 'sql.js';
 
@@ -76,8 +76,6 @@ const SqlRunner: React.FC<SqlRunnerProps> = ({ challenge, strictModeDefault=fals
     try { const raw = localStorage.getItem('sqlProgress'); if(raw){ const parsed = JSON.parse(raw); setCompleted(Array.isArray(parsed?.completed) && parsed.completed.includes(challenge.id)); } } catch {/* ignore */}
   }, [challenge.id]);
 
-  // Init DB on challenge change
-  useEffect(()=>{ initDb(); }, [challenge.id]);
 
   const synthesizeDDL = (table:any) => {
     const cols = table.columns.map((c:any)=>`${c.name} ${c.type || 'TEXT'}${c.pk ? ' PRIMARY KEY' : ''}`);
@@ -117,16 +115,19 @@ const SqlRunner: React.FC<SqlRunnerProps> = ({ challenge, strictModeDefault=fals
     return newDb;
   }
 
-  const initDb = async () => {
+  const initDb = useCallback(async () => {
     try { const newDb = await buildChallengeDbInternal(challenge); setDb(newDb); }
     catch(e:any){ setError(e.message); }
-  };
+  }, [challenge]);
 
-  const validateIdentifiers = (sql:string) => {
+  // Init DB on challenge change (after initDb is defined)
+  useEffect(()=>{ initDb(); }, [challenge.id, initDb]);
+
+  const validateIdentifiers = useCallback((sql:string) => {
     if(!challenge.schema?.tables){ setIdentifierDiagnostics([]); return; }
     try { const { issues } = performIdentifierValidation(sql, challenge.schema.tables); setIdentifierDiagnostics(issues); } catch { setIdentifierDiagnostics([]); }
-  };
-  useEffect(()=>{ validateIdentifiers(userSql); }, [userSql]);
+  }, [challenge.schema?.tables]);
+  useEffect(()=>{ validateIdentifiers(userSql); }, [userSql, validateIdentifiers]);
 
   const renderedDDL = useMemo(()=>{
     if(!challenge.schema?.tables){

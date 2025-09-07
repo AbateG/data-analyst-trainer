@@ -3,22 +3,21 @@
    Heuristic: fields with names containing amount, revenue, cost, price, total, rate.
 */
 import { sqlChallenges } from '../src/challenges/sql.ts';
+import type { SqlChallenge } from '../src/challenges/types.ts';
 
 const NUMERIC_HINT = /(amount|revenue|cost|price|total|rate|spent|spend)/i;
 
-interface Issue { challengeId:number; table:string; rowIndex:number; field:string; value:any }
+interface Issue { challengeId:number; table:string; rowIndex:number; field:string; value:unknown }
 
-function isNumeric(val:any){
-  return typeof val === 'number';
-}
+const isNumeric = (val: unknown): val is number => typeof val === 'number';
 
 function main(){
   const issues:Issue[] = [];
-  for (const ch of sqlChallenges){
+  for (const ch of sqlChallenges as SqlChallenge[]){
     if (!ch.data) continue;
-    for (const [table, rows] of Object.entries<any>(ch.data)){
+    for (const [table, rows] of Object.entries(ch.data as Record<string, unknown>)){
       if (!Array.isArray(rows)) continue;
-      rows.forEach((row, idx) => {
+      (rows as Record<string, unknown>[]).forEach((row, idx) => {
         for (const [k,v] of Object.entries(row)){
           if (NUMERIC_HINT.test(k) && v != null){
             if (!isNumeric(v)){

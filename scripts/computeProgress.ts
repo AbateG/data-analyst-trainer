@@ -5,7 +5,7 @@
 import { sqlChallenges } from '../src/challenges/sql.ts';
 import { pythonChallenges } from '../src/challenges/python.ts';
 import { conceptualChallenges } from '../src/challenges/conceptual.ts';
-import { challengeCompetencies } from '../src/challenges/taxonomy.ts';
+import { challengeCompetencies, type Competency } from '../src/challenges/taxonomy.ts';
 import fs from 'fs';
 import path from 'path';
 
@@ -23,26 +23,28 @@ const competencyWeights: Record<string, number> = {
   'performance-optimization': 1.2
 };
 
-interface ChallengeLike { id:number; difficulty?:string }
+interface ChallengeLike { id:number; difficulty?:string; _type?: 'sql' | 'python' | 'conceptual' }
 
 function challengePoints(ch: ChallengeLike): number {
   const base = difficultyBase[ch.difficulty||'beginner'] || 5;
-  const comps = (challengeCompetencies as any)[ch.id] as string[]|undefined;
+  const comps = (challengeCompetencies as Record<number, Competency[]>)[ch.id];
   if(!comps || comps.length===0) return base; // unmapped fallback
   const w = comps.reduce((s,c)=> s + (competencyWeights[c]||1),0)/comps.length;
   return Math.round(base * w);
 }
 
-function loadUserProgress(){
-  try { return JSON.parse(fs.readFileSync('user-progress.json','utf-8')); } catch { return { completed:{ sql:[], python:[], conceptual:[] } }; }
+interface UserProgress { completed: { sql:number[]; python:number[]; conceptual:number[] } }
+function loadUserProgress(): UserProgress {
+  try { return JSON.parse(fs.readFileSync('user-progress.json','utf-8')) as UserProgress; }
+  catch { return { completed:{ sql:[], python:[], conceptual:[] } }; }
 }
 
 function buildReport(){
   const user = loadUserProgress();
-  const all = [
-    ...sqlChallenges.map(c=>({...c,_type:'sql'})),
-    ...pythonChallenges.map(c=>({...c,_type:'python'})),
-    ...conceptualChallenges.map(c=>({...c,_type:'conceptual'}))
+  const all: ChallengeLike[] = [
+    ...sqlChallenges.map(c=>({...c,_type:'sql' as const})),
+    ...pythonChallenges.map(c=>({...c,_type:'python' as const})),
+    ...conceptualChallenges.map(c=>({...c,_type:'conceptual' as const}))
   ];
   const byCompetency: Record<string,{ earned:number; possible:number; completedIds:number[] }> = {};
   for(const [idStr, comps] of Object.entries(challengeCompetencies)){
@@ -50,10 +52,10 @@ function buildReport(){
     const ch = all.find(c=> c.id===id);
     if(!ch) continue;
     const pts = challengePoints(ch);
-    for(const comp of comps as any[]){
+    for(const comp of comps){
       if(!byCompetency[comp]) byCompetency[comp] = { earned:0, possible:0, completedIds:[] };
       byCompetency[comp].possible += pts;
-      const completed = user.completed?.[ch._type]?.includes(id) || false;
+  const completed = ch._type ? user.completed?.[ch._type]?.includes(id) || false : false;
       if(completed){
         byCompetency[comp].earned += pts;
         byCompetency[comp].completedIds.push(id);

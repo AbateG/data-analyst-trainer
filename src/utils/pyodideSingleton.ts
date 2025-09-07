@@ -6,11 +6,11 @@ let pyodidePromise: Promise<any> | null = null;
 
 export async function getPyodide() {
   // Node / test environment guard (no browser APIs => skip)
-  if (typeof window === 'undefined' || typeof fetch === 'undefined') {
+  if (typeof globalThis === 'undefined' || typeof (globalThis as any).loadPyodide === 'undefined') {
     throw new Error('pyodide_unavailable_in_node');
   }
   if (pyodidePromise) return pyodidePromise;
-  const loadFn: any = (window as any).loadPyodide;
+  const loadFn: any = (globalThis as any).loadPyodide;
   if (!loadFn) {
     throw new Error('loadPyodide_not_found');
   }

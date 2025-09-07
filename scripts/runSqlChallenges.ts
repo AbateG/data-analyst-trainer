@@ -4,6 +4,8 @@
   Generates: reports/challenge-report.json
 */
 import { sqlChallenges } from '../src/challenges/sql.ts';
+// Import loosely typed challenge to avoid strict Difficulty narrowing issues (script context)
+import type { SqlChallenge, Difficulty } from '../src/challenges/types.ts';
 import fs from 'fs';
 import path from 'path';
 import initSqlJs from 'sql.js';
@@ -11,15 +13,18 @@ import initSqlJs from 'sql.js';
 interface RunArgs { limit?: number; id?: number }
 interface SqlRunResult { id: number; status: 'pass'|'fail'|'error'; durationMs: number; message?: string }
 
+type TableRow = Record<string, unknown>;
+type TableData = Record<string, TableRow[]>;
+
 // Numeric normalization helper (round small floating noise & coerce numeric strings)
-function normalizeValue(v:any){
+function normalizeValue(v: unknown){
   if (v === null || v === undefined) return v;
   if (typeof v === 'number') return Math.abs(v) < 1e-12 ? 0 : +v.toFixed(12);
   if (typeof v === 'string' && /^-?\d+(?:\.\d+)?$/.test(v)) return +v;
   return v;
 }
 
-function rowsEqual(a:any[], b:any[]){
+function rowsEqual(a: unknown[], b: unknown[]){
   if (a.length !== b.length) return false;
   for (let i=0;i<a.length;i++){
     const av = a[i];
@@ -43,7 +48,11 @@ function parseArgs(): RunArgs {
 
 async function main() {
   const args = parseArgs();
-  const subset = sqlChallenges.filter(c => args.id ? c.id === args.id : true).slice(0, args.limit || sqlChallenges.length);
+  // Some challenge objects may have difficulty as plain string not narrowed to Difficulty; coerce at runtime.
+  const subset: SqlChallenge[] = sqlChallenges
+    .filter(c => args.id ? c.id === args.id : true)
+    .slice(0, args.limit || sqlChallenges.length)
+    .map(c => ({ ...c, difficulty: c.difficulty as Difficulty | undefined }));
   const SQL = await initSqlJs({});
   const results: SqlRunResult[] = [];
 
@@ -53,14 +62,17 @@ async function main() {
       const db = new SQL.Database();
       // Seed tables
       if (ch.data && typeof ch.data === 'object') {
-        for (const [table, rows] of Object.entries<any>(ch.data)) {
+        for (const [table, rows] of Object.entries(ch.data as TableData)) {
           if (!Array.isArray(rows) || rows.length === 0) continue;
           // Dynamically create schema by inferring column names & types (simplistic: TEXT/NUMERIC)
             const cols = Object.keys(rows[0]);
             const colDefs = cols.map(col => `${col} TEXT`).join(',');
             db.run(`CREATE TABLE ${table} (${colDefs});`);
             const insert = db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')});`);
-            for (const r of rows) insert.run(cols.map(c => (r as any)[c]));
+            for (const r of rows) {
+              const bindVals = cols.map(c => r[c]) as (string | number | null)[];
+              insert.run(bindVals);
+            }
             insert.free();
         }
       }
@@ -73,9 +85,9 @@ async function main() {
       const execSql = startIdx >= 0 ? lines.slice(startIdx).join('\n') : fenceStripped;
       const res = db.exec(execSql);
       // Normalize expected
-      if (ch.expectedResult) {
-  const gotRaw = res[0]?.values || [];
-  const exp = ch.expectedResult;
+    if (ch.expectedResult) {
+  const gotRaw: unknown[][] = res[0]?.values || [];
+  const exp: unknown[][] = ch.expectedResult;
   const got = gotRaw.map(r => r.map(normalizeValue));
   const expected = exp.map(r => r.map(normalizeValue));
 
@@ -88,8 +100,9 @@ async function main() {
         results.push({ id: ch.id, status: 'pass', durationMs: +(performance.now()-t0).toFixed(2), message: 'No expectedResult declared (skipped diff)' });
       }
       db.close();
-    } catch (e:any) {
-      results.push({ id: ch.id, status: 'error', durationMs: +(performance.now()-t0).toFixed(2), message: e?.message || String(e) });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      results.push({ id: ch.id, status: 'error', durationMs: +(performance.now()-t0).toFixed(2), message: msg });
     }
   }
 

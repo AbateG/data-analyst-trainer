@@ -1,7 +1,6 @@
 // Lightweight runtime validator to run each Python challenge in Pyodide (if available)
 // and emit a concise report. Skips heavy/contextual challenges automatically.
 import { runAllPythonChallenges } from '../src/utils/pythonHeadlessRunner';
-import { pythonChallenges } from '../src/challenges/python';
 
 (async () => {
   const heavyTags = new Set(['boto3','aws']);
