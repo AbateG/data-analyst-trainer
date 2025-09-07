@@ -59,7 +59,7 @@ async function main() {
             const cols = Object.keys(rows[0]);
             const colDefs = cols.map(col => `${col} TEXT`).join(',');
             db.run(`CREATE TABLE ${table} (${colDefs});`);
-            const insert = db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(_=> '?').join(',')});`);
+            const insert = db.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')});`);
             for (const r of rows) insert.run(cols.map(c => (r as any)[c]));
             insert.free();
         }

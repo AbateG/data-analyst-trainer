@@ -42,5 +42,6 @@ export async function loadChallengeChunks(opts: LoadOptions) : Promise<(SqlChall
 // Convenience: get combined SQL challenges including dynamic chunks
 export async function getAllSqlChallengesDynamic(): Promise<SqlChallenge[]> {
   const dynamic = await loadChallengeChunks({ type: 'sql', chunkIndices: Object.keys(sqlChunkLoaders).map(Number) });
+  // Schema (if present) is already embedded in each challenge object; nothing extra required here yet.
   return ([...sqlChallenges, ...dynamic]) as SqlChallenge[];
 }

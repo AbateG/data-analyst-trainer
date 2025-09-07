@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Data Analyst Trainer - Isometric Dashboard</title>
+  <desc id="desc">Isometric style dashboard with panels representing SQL editor, Python console, conceptual quiz and progress analytics using the brand color palette.</desc>
+  <rect width="960" height="540" rx="24" fill="#ecf0f1"/>
+  <!-- Decorative grid -->
+  <g stroke="#d5dde0" stroke-width="1" opacity="0.6">
+    <path d="M0 60H960"/><path d="M0 120H960"/><path d="M0 180H960"/><path d="M0 240H960"/><path d="M0 300H960"/><path d="M0 360H960"/><path d="M0 420H960"/><path d="M0 480H960"/>
+    <path d="M80 0V540"/><path d="M160 0V540"/><path d="M240 0V540"/><path d="M320 0V540"/><path d="M400 0V540"/><path d="M480 0V540"/><path d="M560 0V540"/><path d="M640 0V540"/><path d="M720 0V540"/><path d="M800 0V540"/><path d="M880 0V540"/>
+  </g>
+  <!-- Isometric base shadow -->
+  <path d="M160 420l140 60 220-90-140-60-220 90z" fill="#2c3e50" opacity="0.08"/>
+  <!-- SQL Panel -->
+  <g transform="translate(180 170) skewY(-20) scale(1 0.9)">
+    <rect width="220" height="140" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+    <rect x="0" y="0" width="220" height="28" rx="10" fill="#2c3e50"/>
+    <circle cx="16" cy="14" r="5" fill="#3498db"/>
+    <text x="16" y="60" font-family="'Segoe UI', Arial" font-size="14" fill="#2c3e50">SELECT country, COUNT(*)</text>
+    <text x="16" y="82" font-family="'Segoe UI', Arial" font-size="14" fill="#2c3e50">FROM users</text>
+    <text x="16" y="104" font-family="'Segoe UI', Arial" font-size="14" fill="#2c3e50">GROUP BY country;</text>
+  </g>
+  <!-- Python Console -->
+  <g transform="translate(430 230) skewY(-20) scale(1 0.9)">
+    <rect width="200" height="120" rx="10" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+    <rect x="0" y="0" width="200" height="26" rx="10" fill="#2c3e50"/>
+    <circle cx="16" cy="13" r="5" fill="#3498db"/>
+    <text x="16" y="54" font-family="'Segoe UI', Arial" font-size="13" fill="#2c3e50">import pandas as pd</text>
+    <text x="16" y="74" font-family="'Segoe UI', Arial" font-size="13" fill="#2c3e50">df.groupby('country')</text>
+    <text x="16" y="94" font-family="'Segoe UI', Arial" font-size="13" fill="#2c3e50">.size()</text>
+  </g>
+  <!-- Conceptual Quiz Card -->
+  <g transform="translate(330 90) skewY(-20) scale(1 0.9)">
+    <rect width="180" height="110" rx="12" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+    <text x="16" y="40" font-family="'Segoe UI', Arial" font-size="13" fill="#2c3e50">What is normalization?</text>
+    <rect x="16" y="54" width="148" height="18" rx="4" fill="#3498db" opacity="0.18"/>
+    <rect x="16" y="78" width="120" height="18" rx="4" fill="#3498db" opacity="0.08"/>
+  </g>
+  <!-- Progress Analytics -->
+  <g transform="translate(600 130) skewY(-20) scale(1 0.9)">
+    <rect width="160" height="160" rx="14" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+    <circle cx="80" cy="82" r="46" fill="none" stroke="#d5dde0" stroke-width="10"/>
+    <circle cx="80" cy="82" r="46" fill="none" stroke="#3498db" stroke-width="10" stroke-dasharray="180 999" stroke-linecap="round" transform="rotate(-90 80 82)"/>
+    <text x="80" y="90" font-family="'Segoe UI', Arial" font-size="20" text-anchor="middle" fill="#2c3e50">65%</text>
+    <rect x="24" y="120" width="112" height="12" rx="6" fill="#d5dde0"/>
+    <rect x="24" y="120" width="72" height="12" rx="6" fill="#3498db"/>
+  </g>
+  <text x="60" y="80" font-family="'Segoe UI', Arial" font-size="42" font-weight="600" fill="#2c3e50">Data Analyst Trainer</text>
+  <text x="60" y="118" font-family="'Segoe UI', Arial" font-size="22" fill="#2c3e50">Practice SQL • Python • Concepts • Track Progress</text>
+</svg>

@@ -10,4 +10,33 @@ const base = explicit ? explicit : `/${repoName}/`
 export default defineConfig({
   plugins: [react()],
   base,
+  build: {
+    // Enable source maps for better debugging
+    sourcemap: true,
+    // Optimize chunk splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          pyodide: ['pyodide'],
+          sql: ['sql.js']
+        }
+      }
+    },
+    // Enable build caching
+    watch: {
+      include: ['src/**', 'public/**']
+    }
+  },
+  // Enable dependency pre-bundling for faster dev server
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'pyodide', 'sql.js', 'highlight.js']
+  },
+  // Enable caching for better performance
+  server: {
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..']
+    }
+  }
 })

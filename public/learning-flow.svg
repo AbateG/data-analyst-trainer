@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="960" height="360" viewBox="0 0 960 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Data Analyst Trainer - Learning Flow</title>
+  <desc id="desc">Abstract flow from SQL to Python to Concepts to Progress using connected nodes.</desc>
+  <rect width="960" height="360" fill="#ecf0f1"/>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2c3e50"/>
+      <stop offset="100%" stop-color="#3498db"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <!-- Path -->
+  <path d="M120 240 C260 120 380 120 480 200 C600 300 720 300 840 180" stroke="#3498db" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="4 14"/>
+  <!-- Nodes -->
+  <g font-family="'Segoe UI', Arial" text-anchor="middle" fill="#2c3e50" font-size="16" font-weight="600">
+    <g transform="translate(120 240)" filter="url(#shadow)">
+      <circle r="54" fill="white" stroke="#2c3e50" stroke-width="2"/>
+      <text y="6">SQL</text>
+      <rect x="-34" y="24" width="68" height="8" rx="4" fill="#3498db" opacity="0.3"/>
+    </g>
+    <g transform="translate(360 150)" filter="url(#shadow)">
+      <circle r="54" fill="white" stroke="#2c3e50" stroke-width="2"/>
+      <text y="6">Python</text>
+      <rect x="-38" y="24" width="76" height="8" rx="4" fill="#3498db" opacity="0.3"/>
+    </g>
+    <g transform="translate(600 270)" filter="url(#shadow)">
+      <circle r="54" fill="white" stroke="#2c3e50" stroke-width="2"/>
+      <text y="-4">Concepts</text>
+      <rect x="-40" y="16" width="80" height="8" rx="4" fill="#3498db" opacity="0.3"/>
+    </g>
+    <g transform="translate(840 180)" filter="url(#shadow)">
+      <circle r="54" fill="white" stroke="#2c3e50" stroke-width="2"/>
+      <text y="-6">Progress</text>
+      <path d="M-24 14 h48 a12 12 0 0 1 0 24 h-48 a12 12 0 0 1 0 -24z" fill="#d5dde0"/>
+      <path d="M-24 14 h28 a12 12 0 0 1 0 24 h-28 a12 12 0 0 1 0 -24z" fill="#3498db"/>
+    </g>
+  </g>
+  <text x="60" y="70" font-family="'Segoe UI', Arial" font-size="40" font-weight="600" fill="#2c3e50">Guided Learning Flow</text>
+  <text x="60" y="110" font-family="'Segoe UI', Arial" font-size="20" fill="#2c3e50">From practice to mastery</text>
+</svg>

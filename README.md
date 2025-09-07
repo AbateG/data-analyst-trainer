@@ -7,6 +7,14 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
+## Authoring Docs
+Authoring new Python challenges? See: [docs/CHALLENGE_AUTHORING.md](docs/CHALLENGE_AUTHORING.md)
+Run validation helpers:
+```powershell
+npm run validate:python     # static lint & heuristics
+npm run validate:python:runtime  # executes challenges (requires browser env for Pyodide)
+```
+
 ## Conceptual Answer Evaluation (New)
 Free-form conceptual answers are now auto-scored locally (no external API) to encourage explaining concepts in your own words instead of memorizing.
 
@@ -258,5 +266,116 @@ Vite fingerprints assets. A new push invalidates old bundles automatically; use 
 ### Deploy from a different branch (optional)
 If you prefer a `release` branch, edit `on.push.branches` in `.github/workflows/deploy-pages.yml` and push there.
 
+## SQL Schema & Validation (New)
+
+Lightweight SQL identifier validation now assists query authors:
+
+Features:
+- Auto schema inference when a challenge omits an explicit `schema` block (columns derived from seed data rows).
+- CTE awareness: leading `WITH cte AS (...)` names are recognized as tables in subsequent clauses.
+- Wildcard handling: `table.*` validated, global `*` warns if no FROM table.
+- Strict Mode toggle: blocks execution until unknown tables/columns are resolved.
+
+Non-goals (current): deep nested CTE parsing, subquery alias column lineage, quoted identifiers with spaces, derived column alias checks.
+
+Usage:
+1. Draft your query; warnings list unresolved identifiers.
+2. Enable Strict Mode to enforce clean resolution before running.
+3. Iterate until warnings disappear; Run becomes enabled.
+
+This balances fast iteration with optional rigor for training scenarios.
+
 ---
 Happy learning & iterating! Contributions welcome—open an issue for feature ideas.
+
+## Python Manifest Enhancements (Experimental)
+New richer Python challenge manifests (see `src/types/pythonChallengeManifest.ts`) support:
+- Progressive hints (`hints[]`) rendered as a collapsible list in the runner.
+- Structured examples (`examples[]`) with optional expected inputs/outputs for learners.
+- Property assertions (`properties[]`) including built-ins and simple expression checks.
+
+Runtime property feedback:
+1. After running code, each property is evaluated against the first example (temporary heuristic).
+2. Expression properties use a constrained JS evaluator that blocks unsafe tokens (`function`, `class`, `import`, etc.).
+3. Results show pass/fail with short messages below the output panel.
+
+Authoring expression property example:
+```ts
+{
+  id: 'has_minimum_fields',
+  description: 'Solution includes required function name',
+  kind: 'expression',
+  expression: 'manifest.contract.functionName && !!manifest.code.solution',
+  message: 'Function defined'
+}
+```
+
+Legacy adapter: `adaptManifestToLegacy` attaches the original manifest on the legacy challenge object as `__manifest` so the updated `PythonRunner` can surface hints & properties without breaking older challenge definitions.
+
+Planned next steps:
+- Broaden property evaluation context (multi-example loop).
+- Add diff/time complexity metadata rendering.
+- Persist latest property status per attempt for spaced repetition targeting.
+
+## Pyodide Memory Errors (Troubleshooting)
+If you saw repeated console logs like:
+```
+RangeError: WebAssembly.Memory(): could not allocate memory
+  at loadPyodide ...
+```
+This was caused by multiple independent calls to `loadPyodide` (each attempt allocates a large WASM memory region). Mounting the Python runner component several times or triggering hot reloads created overlapping loads.
+
+Fix implemented:
+- Added a shared singleton loader `src/utils/pyodideSingleton.ts` that stores the in‑flight promise and returns it to all callers.
+- Updated `PythonRunner.tsx` and `pythonHeadlessRunner.ts` to use the singleton.
+
+How to use going forward:
+```ts
+import { getPyodide } from '../utils/pyodideSingleton';
+const py = await getPyodide();
+```
+
+If you ever need to force a reload (rare), refresh the page. Do NOT add new direct `window.loadPyodide(...)` calls elsewhere.
+
+Test coverage: `pyodideSingleton.test.ts` verifies only one underlying load occurs even with concurrent calls.
+
+
+## SQL Schema Metadata (New)
+To eliminate ambiguity in SQL challenges, each challenge can now declare an explicit `schema` object (see example in `sql.ts` id=1).
+
+Why:
+- Learners see authoritative table + column definitions (types, PKs, semantics).
+- The runner validates referenced tables/columns before execution and surfaces hints.
+- Future extensions: stricter type casting checks, auto-generated ER snippets.
+
+Interfaces (in `src/challenges/types.ts`):
+- `SqlSchema` → `{ version?, tables: SqlTableSchema[], expectedResultShape? }`
+- `SqlTableSchema` → `name, description?, columns[], sampleRows?, ddl?`
+- `SqlTableColumn` → `name, type, description?, nullable?, pk?`
+- `ExpectedResultShape` → output column contract & ordering notes.
+
+Authoring Steps:
+1. Add `schema` block to challenge object.
+2. Provide at least: table `name`, each column `name` & rough `type` (TEXT/INTEGER/REAL/DATE/TIMESTAMP).
+3. Include 1–3 `sampleRows` (representative & edge case if space permits).
+4. Add `expectedResultShape` when the output differs from raw columns (e.g., aggregated alias columns, ordering contract).
+5. (Optional) Supply custom `ddl` if you need constraints not auto-synthesized.
+
+Validator Behavior (current):
+- Parses `FROM` / `JOIN` clauses, supports simple aliases (`table t` or `table AS t`).
+- Checks `alias.column` or `table.column` tokens against declared schema.
+- Warns (non-blocking) with: `Unknown table: ...` or `Unknown column: table.column`.
+
+Limitations (roadmap):
+- Does not yet handle subqueries, CTE alias scoping, quoted identifiers with spaces, or wildcard column expansion.
+- Does not infer types from inserted JSON (types are descriptive only).
+
+Extending:
+- Improve tokenizer to skip strings/comments.
+- Add CTE detection (strip `WITH cte AS (...)`).
+- Provide toggle to treat unknown identifiers as hard errors.
+
+Migration Plan:
+- Incrementally backfill schemas for existing challenges (start with earlier IDs covering core tables: users/transactions/etc.).
+- Encourage new challenges to always include schema; make schema mandatory after a set date.
+

@@ -10,3 +10,20 @@
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+/* Diff styling */
+.diff-view {
+    font-family: monospace;
+    margin-top: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: auto;
+    max-height: 240px;
+    background: #fff;
+}
+.diff-line { padding: 0 0.5rem; line-height: 1.25rem; white-space: pre; }
+.diff-line.added { background: #e6ffed; color: #22863a; }
+.diff-line.removed { background: #ffeef0; color: #b31d28; }
+.diff-line.unchanged { color: #444; opacity: 0.75; }
+.diff-controls { display:flex; gap:0.5rem; margin:0.5rem 0; align-items:center; }
+.diff-controls button { font-size:0.7rem; padding:0.2rem 0.5rem; }

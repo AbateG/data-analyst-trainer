@@ -29,6 +29,43 @@ WHERE
         { user_id: 2, signup_date: '2024-12-05', country: 'DE' },
         { user_id: 3, signup_date: '2025-01-18', country: 'USA' },
       ]
+    },
+    schema: {
+      version: '1.0.0',
+      tables: [
+        {
+          name: 'users',
+          description: 'Application end users with signup metadata',
+          columns: [
+            { name: 'user_id', type: 'INTEGER', pk: true, description: 'Unique user identifier' },
+            { name: 'signup_date', type: 'DATE', description: 'Date the user registered (UTC)' },
+            { name: 'country', type: 'TEXT', description: 'ISO country code at signup' }
+          ],
+          sampleRows: [
+            { user_id: 1, signup_date: '2025-01-10', country: 'USA' },
+            { user_id: 2, signup_date: '2024-12-05', country: 'DE' }
+          ]
+        },
+        {
+          name: 'transactions',
+          description: 'Monetary purchase events made by users',
+          columns: [
+            { name: 'transaction_id', type: 'TEXT', pk: true, description: 'Transaction primary key' },
+            { name: 'user_id', type: 'INTEGER', description: 'FK to users.user_id' },
+            { name: 'product_id', type: 'INTEGER', description: 'Product identifier purchased' },
+            { name: 'amount', type: 'REAL', description: 'Purchase amount in USD' },
+            { name: 'created_at', type: 'TIMESTAMP', description: 'Event timestamp (UTC)' }
+          ],
+          sampleRows: [
+            { transaction_id: 'a', user_id: 1, product_id: 101, amount: 10.00, created_at: '2025-01-15 10:00:00' },
+            { transaction_id: 'b', user_id: 2, product_id: 102, amount: 20.00, created_at: '2025-01-16 11:00:00' }
+          ]
+        }
+      ],
+      expectedResultShape: {
+        columns: [ { name: 'total_revenue', type: 'REAL', description: 'Sum of amounts for qualifying cohort' } ],
+        notes: 'Cohort: users whose first month of activity includes a transaction; filter month=2025-01.'
+      }
     }
   },
   {
@@ -68,6 +105,8 @@ GROUP BY
 HAVING
   COUNT(t.transaction_id) > 1;
 `,
+  // cleanedSolution (executable only) kept implicit; leaving solution above for learner explanation
+  solutionSql: `SELECT u.user_id FROM users u JOIN transactions t ON u.user_id = t.user_id WHERE DATE(u.signup_date) = DATE(t.created_at) GROUP BY u.user_id HAVING COUNT(t.transaction_id) > 1;`,
     expectedResult: [[1]],
     data: {
         transactions: [
@@ -79,6 +118,37 @@ HAVING
             { user_id: 1, signup_date: '2025-01-10', country: 'USA' },
             { user_id: 2, signup_date: '2025-02-01', country: 'DE' },
         ]
+    },
+    schema: {
+      version: '1.0.0',
+      tables: [
+        {
+          name: 'users',
+          description: 'User signup dates (DATE) vs transaction timestamps (TIMESTAMP)',
+          columns: [
+            { name: 'user_id', type: 'INTEGER', pk: true },
+            { name: 'signup_date', type: 'DATE', description: 'Signup date only (no time)' },
+            { name: 'country', type: 'TEXT' }
+          ],
+          sampleRows: [ { user_id: 1, signup_date: '2025-01-10', country: 'USA' } ]
+        },
+        {
+          name: 'transactions',
+          description: 'Purchase events with full timestamp granularity',
+          columns: [
+            { name: 'transaction_id', type: 'TEXT', pk: true },
+            { name: 'user_id', type: 'INTEGER' },
+            { name: 'product_id', type: 'INTEGER' },
+            { name: 'amount', type: 'REAL' },
+            { name: 'created_at', type: 'TIMESTAMP' }
+          ],
+          sampleRows: [ { transaction_id: 'a', user_id: 1, product_id: 101, amount: 10.00, created_at: '2025-01-10 10:00:00' } ]
+        }
+      ],
+      expectedResultShape: {
+        columns: [ { name: 'user_id', type: 'INTEGER', description: 'Users with >1 purchase on signup date' } ],
+        notes: 'Must CAST/DATE-align timestamp column to compare calendar day.'
+      }
     }
   },
   {
@@ -825,15 +895,17 @@ WHERE
          COALESCE(effective_end, '9999-12-31') AS norm_end
   FROM dimension_customer
 ), pairs AS (
+  -- Only consider closed intervals as the left side (a) for overlap detection to avoid double-flagging open rows
   SELECT a.customer_id, a.effective_start AS a_start, a.norm_end AS a_end,
          b.effective_start AS b_start, b.norm_end AS b_end
   FROM expanded a
   JOIN expanded b ON a.customer_id = b.customer_id AND a.effective_start < b.effective_start
+  WHERE a.effective_end IS NOT NULL
 )
 SELECT customer_id,
        b_start AS offending_start,
        b_end   AS offending_end,
-       CASE WHEN b_start < a_end THEN 'OVERLAP' END AS issue_type
+       'OVERLAP' AS issue_type
 FROM pairs
 WHERE b_start < a_end
 UNION ALL
@@ -845,6 +917,30 @@ WHERE effective_end IS NULL AND EXISTS (
 );`,
   // Adjusted expected: actual overlap extends until first row end 2025-03-01; second record ends 2025-04-01; keep previously intended truncated example mid-range (use 2025-03-01) to reflect overlapping period discovered early.
   expectedResult: [[101,'2025-02-01','2025-04-01','OVERLAP'],[102,'2025-05-01',null,'OPEN_WITH_LATER_VERSION']],
+    solutionSql: `WITH expanded AS (
+  SELECT customer_id, attr, effective_start, effective_end,
+         COALESCE(effective_end, '9999-12-31') AS norm_end
+  FROM dimension_customer
+), pairs AS (
+  SELECT a.customer_id, a.effective_start AS a_start, a.norm_end AS a_end,
+         b.effective_start AS b_start, b.norm_end AS b_end
+  FROM expanded a
+  JOIN expanded b ON a.customer_id = b.customer_id AND a.effective_start < b.effective_start
+  WHERE a.effective_end IS NOT NULL
+)
+SELECT customer_id,
+       b_start AS offending_start,
+       b_end   AS offending_end,
+       'OVERLAP' AS issue_type
+FROM pairs
+WHERE b_start < a_end
+UNION ALL
+SELECT customer_id, effective_start, effective_end, 'OPEN_WITH_LATER_VERSION'
+FROM dimension_customer dc
+WHERE effective_end IS NULL AND EXISTS (
+  SELECT 1 FROM dimension_customer nx
+  WHERE nx.customer_id = dc.customer_id AND nx.effective_start > dc.effective_start
+);`,
     data: {
       dimension_customer: [
         { customer_id:101, attr:'basic',  effective_start:'2025-01-01', effective_end:'2025-03-01' },
@@ -894,8 +990,9 @@ FROM grouped;`,
     difficulty: 'intermediate',
     objective: 'Identify non-partition-pruned query and corrected version',
     question: `Partition Pruning Fix: A table events_partitioned(partition_date DATE, event_ts TIMESTAMP, user_id). Current query filters WHERE DATE(event_ts) = '2025-07-01' causing full scan. Provide optimized query leveraging partition_date for pruning plus residual time filter.`,
-    solution: `-- Anti-pattern (full scan): SELECT COUNT(*) FROM events_partitioned WHERE DATE(event_ts)='2025-07-01';\n-- Optimized:\nSELECT COUNT(*)\nFROM events_partitioned\nWHERE partition_date = '2025-07-01'\n  AND event_ts >= '2025-07-01 00:00:00'\n  AND event_ts <  '2025-07-02 00:00:00';`,
-  expectedResult: [],
+  solution: `-- Anti-pattern (full scan): SELECT COUNT(*) FROM events_partitioned WHERE DATE(event_ts)='2025-07-01';\n-- Optimized:\nSELECT COUNT(*)\nFROM events_partitioned\nWHERE partition_date = '2025-07-01'\n  AND event_ts >= '2025-07-01 00:00:00'\n  AND event_ts <  '2025-07-02 00:00:00';`,
+  solutionSql: `SELECT COUNT(*) FROM events_partitioned WHERE partition_date='2025-07-01' AND event_ts>='2025-07-01 00:00:00' AND event_ts<'2025-07-02 00:00:00';`,
+  expectedResult: [[1]],
   data: { events_partitioned: [ { partition_date:'2025-07-01', event_ts:'2025-07-01 12:00:00', user_id:1 } ] }
   },
   {
