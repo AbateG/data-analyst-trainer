@@ -3,6 +3,19 @@ import { NavLink } from 'react-router-dom';
 import '../styles/Navbar.css';
 
 const Navbar: React.FC = () => {
+  const [theme, setTheme] = React.useState<string>(() =>
+    typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark') : 'dark'
+  );
+
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -30,6 +43,11 @@ const Navbar: React.FC = () => {
           <NavLink to="/progress" className={({ isActive }) => (isActive ? 'active' : '')}>
             Progress
           </NavLink>
+        </li>
+        <li>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle color theme">
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
         </li>
       </ul>
     </nav>

@@ -8,6 +8,8 @@
   <a href="https://github.com/AbateG/data-analyst-trainer/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/AbateG/data-analyst-trainer?include_prereleases&label=latest" /></a>
 </p>
 
+Live site: https://abateg.github.io/data-analyst-trainer/
+
 <!-- Repo topics (add via GitHub UI or gh cli): training, data-engineering, sql, python, spaced-repetition -->
 <!-- Codecov badge does not require a token for public repos. -->
 
