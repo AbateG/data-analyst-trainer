@@ -2,37 +2,44 @@
     width: 100%;
     min-height: 150px;
     padding: 1rem;
-
-.badges { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
-.badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; background:#eef; color:#223; }
-.badge-warning { background:#fdd; color:#822; }
-.confidence-high { background:#d9f9d9; color:#165c16; }
-.confidence-medium { background:#fff5cc; color:#7a5d00; }
-.confidence-low { background:#ffe0e0; color:#8a1f1f; }
-.due-terms { margin-top:4px; font-size:0.75rem; color:#555; }
     border-radius: var(--border-radius);
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
+    background: rgba(15,23,42,0.55);
+    color: var(--text-color);
     font-family: inherit;
     font-size: 1rem;
     margin-top: 1rem;
 }
 
+.badges { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; background: rgba(99,102,241,0.16); color: var(--text-color); border: 1px solid var(--border-color); }
+.badge-warning { background: rgba(239,68,68,0.16); color: var(--error-text); border: 1px solid var(--error-border); }
+.confidence-high { background: rgba(34,197,94,0.16); color: var(--success-text); border: 1px solid var(--success-border); }
+.confidence-medium { background: rgba(234,179,8,0.16); color: #fbbf24; border: 1px solid rgba(234,179,8,0.35); }
+.confidence-low { background: rgba(239,68,68,0.16); color: var(--error-text); border: 1px solid var(--error-border); }
+.due-terms { margin-top:4px; font-size:0.75rem; color: var(--muted-color); }
+
 .verify-btn {
-    background-color: var(--primary-color);
-    color: white;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    color: #0b1220;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
     cursor: pointer;
     margin-top: 1rem;
     margin-right: 1rem;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(99,102,241,0.35);
+    transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .verify-btn:hover:not(:disabled) {
-    background-color: var(--secondary-color);
+    filter: brightness(1.05);
+    box-shadow: 0 10px 22px rgba(99,102,241,0.45);
 }
 
 .verify-btn:disabled {
-    background-color: #ccc;
+    background: #4b5563;
+    color: #cbd5e1;
     cursor: not-allowed;
 }

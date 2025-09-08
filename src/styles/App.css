@@ -1,18 +1,39 @@
 :root {
-  --primary-color: #2c3e50;
-  --secondary-color: #3498db;
-  --background-color: #ecf0f1;
-  --text-color: #34495e;
-  --card-bg-color: #ffffff;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Core palette (modern, accessible) */
+  --primary-color: #6366f1;         /* indigo-500 */
+  --secondary-color: #22d3ee;       /* cyan-400 */
+  --accent-color: #f472b6;          /* pink-400 */
+
+  /* Surfaces & text (dark, soft) */
+  --bg-0: #0b1220;                  /* page background */
+  --bg-1: rgba(17, 24, 39, 0.78);   /* card surface */
+  --bg-2: rgba(30, 41, 59, 0.6);    /* deeper surface */
+  --border-color: rgba(148, 163, 184, 0.18);
+  --text-color: #e5e7eb;            /* slate-200 */
+  --muted-color: #94a3b8;           /* slate-400 */
+
+  /* Effects */
+  --border-radius: 12px;
+  --box-shadow: 0 10px 30px rgba(2,6,23,0.45);
+  --backdrop-blur: saturate(140%) blur(8px);
+
+  /* Semantic */
+  --success-bg: rgba(34,197,94,0.12);
+  --success-border: rgba(34,197,94,0.35);
+  --success-text: #22c55e;
+  --error-bg: rgba(239,68,68,0.12);
+  --error-border: rgba(239,68,68,0.35);
+  --error-text: #ef4444;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
+  background: radial-gradient(1200px 800px at 20% -10%, rgba(99,102,241,0.25), transparent 60%),
+              radial-gradient(1200px 800px at 100% 20%, rgba(34,211,238,0.18), transparent 55%),
+              radial-gradient(800px 600px at -10% 100%, rgba(244,114,182,0.18), transparent 60%),
+              var(--bg-0);
 }
 
 .App {

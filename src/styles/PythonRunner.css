@@ -4,7 +4,8 @@
 
 .output-container {
     margin-top: 1rem;
-    background-color: #f4f4f4;
+    background: rgba(15,23,42,0.55);
+    border: 1px solid var(--border-color);
     padding: 1rem;
     border-radius: var(--border-radius);
     white-space: pre-wrap;
@@ -15,17 +16,17 @@
 .diff-view {
     font-family: monospace;
     margin-top: 0.5rem;
-    border: 1px solid #444;
-    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     overflow: auto;
-    max-height: 240px;
-    background: #111;
-    color: #eee;
+    max-height: 260px;
+    background: #0b1220;
+    color: #e5e7eb;
 }
 .diff-line { padding: 0 0.5rem; line-height: 1.25rem; white-space: pre; }
-.diff-line.added { background: #12381f; color: #56d364; }
-.diff-line.removed { background: #3d1e23; color: #ff7b72; }
-.diff-line.unchanged { color: #bbb; opacity: 0.8; }
+.diff-line.added { background: rgba(34,197,94,0.12); color: var(--success-text); }
+.diff-line.removed { background: rgba(239,68,68,0.12); color: var(--error-text); }
+.diff-line.unchanged { color: var(--muted-color); opacity: 0.9; }
 .diff-controls { display:flex; gap:0.5rem; margin:0.5rem 0; align-items:center; }
 .diff-controls button { font-size:0.7rem; padding:0.2rem 0.5rem; }
 
@@ -57,7 +58,7 @@
 .python-runner div[style*='background:#222'] { color:#fff !important; }
 
 /* Guidance summary text color on dark backgrounds */
-.python-runner summary { color: var(--secondary-color, #4fa3ff); }
+.python-runner summary { color: var(--secondary-color, #22d3ee); }
 
 /* -------- Dark panel contrast outside .python-runner (Challenge cards) -------- */
 .challenge-card [style*='background:#111'],
@@ -122,7 +123,8 @@
 .instruction-panel,
 .challenge-intro,
 .dark-panel {
-    background:#222
+    background: rgba(2,6,23,0.45);
+    border: 1px solid var(--border-color);
 }
 
 /* Utility classes (use these instead of inline styles if you can) */

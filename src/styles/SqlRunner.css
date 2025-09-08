@@ -3,25 +3,27 @@
 }
 
 .run-btn {
-    background-color: var(--secondary-color);
-    color: white;
+    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+    color: #0b1220;
     border: none;
     padding: 0.8rem 1.5rem;
-    border-radius: var(--border-radius);
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1rem;
     margin-top: 1rem;
-    transition: background-color 0.3s;
+    transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 6px 16px rgba(34,211,238,0.35);
 }
 
 .run-btn:hover {
-    background-color: #2980b9;
+    filter: brightness(1.05);
+    box-shadow: 0 10px 22px rgba(34,211,238,0.45);
 }
 
 .error-message {
-    color: #c0392b;
-    background-color: #fbeae5;
-    border: 1px solid #c0392b;
+    color: var(--error-text);
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
     padding: 1rem;
     border-radius: var(--border-radius);
     margin-top: 1rem;
@@ -35,15 +37,19 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+    background: rgba(15,23,42,0.55);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
 .results-container th,
 .results-container td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     padding: 0.5rem;
     text-align: left;
 }
 
 .results-container th {
-    background-color: #f4f4f4;
+    background: rgba(2,6,23,0.45);
 }

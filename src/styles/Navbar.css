@@ -1,15 +1,17 @@
 .navbar {
-  background-color: var(--primary-color);
-  color: white;
+  color: var(--text-color);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(180deg, rgba(2,6,23,0.65) 0%, rgba(2,6,23,0.35) 100%);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
   box-shadow: var(--box-shadow);
 }
 
 .navbar-brand a {
-  color: white;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
@@ -27,12 +29,12 @@
 }
 
 .navbar-nav a {
-  color: white;
+  color: var(--muted-color);
   text-decoration: none;
   font-size: 1rem;
   padding: 0.5rem 0;
   position: relative;
-  transition: color 0.3s;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .navbar-nav a::after {
@@ -42,8 +44,8 @@
   left: 0;
   width: 0;
   height: 2px;
-  background-color: var(--secondary-color);
-  transition: width 0.3s;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  transition: width 0.25s ease;
 }
 
 .navbar-nav a:hover,
