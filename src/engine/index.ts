@@ -1,3 +1,5 @@
 // Engine public barrel exports
 export * from './sqlValidation';
-// Future: export evaluators, manifest adapters, spaced repetition core, etc.
+export * from './conceptualEvaluator';
+export * from './spacedRepetition';
+// Future: export manifest adapters, python property evaluation core, etc.

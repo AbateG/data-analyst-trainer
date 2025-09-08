@@ -1,4 +1,4 @@
-import { evaluateConceptAnswer } from '../src/challenges/conceptualEvaluator.ts';
+import { evaluateConceptAnswer } from '@engine/conceptualEvaluator';
 
 async function run() {
   const answer = `In distributed systems under partition you must choose between availability and consistency; latency impacts perceived lag. ACID focus differs. eventual consistency may appear.`;

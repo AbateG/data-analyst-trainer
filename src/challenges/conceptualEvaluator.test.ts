@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateConceptAnswer, isConceptEvaluationResult } from './conceptualEvaluator';
+import { evaluateConceptAnswer, isConceptEvaluationResult } from '@engine/conceptualEvaluator';
 
 describe('conceptualEvaluator', () => {
   it('handles empty answer', async () => {
