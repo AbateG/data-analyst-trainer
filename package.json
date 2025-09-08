@@ -16,14 +16,14 @@
     "score:stdout": "ts-node --esm ./scripts/computeProgress.ts",
     "validate:all": "npm run validate:challenges && npm run run:sql && npm run score",
     "test": "vitest run",
-  "test:watch": "vitest",
-  "export:images": "ts-node --esm ./scripts/exportImages.ts",
-  "report:failing-python": "ts-node --esm ./scripts/reportPythonFailures.ts",
-  "validate:python": "ts-node --esm ./scripts/validatePythonChallenges.ts",
-  "validate:python:runtime": "ts-node --esm ./scripts/validatePythonRuntime.ts",
-  "validate:python:hints": "ts-node --esm ./scripts/validatePythonHints.ts",
-  "build:engine": "tsc -p tsconfig.engine.json --noEmit",
-  "validate:python:enhanced": "ts-node --esm ./scripts/validateEnhancedPythonChallenges.ts"
+    "test:watch": "vitest",
+    "export:images": "ts-node --esm ./scripts/exportImages.ts",
+    "report:failing-python": "ts-node --esm ./scripts/reportPythonFailures.ts",
+    "validate:python": "ts-node --esm ./scripts/validatePythonChallenges.ts",
+    "validate:python:runtime": "ts-node --esm ./scripts/validatePythonRuntime.ts",
+    "validate:python:hints": "ts-node --esm ./scripts/validatePythonHints.ts",
+    "build:engine": "tsc -p tsconfig.engine.json --noEmit",
+    "validate:python:enhanced": "ts-node --esm ./scripts/validateEnhancedPythonChallenges.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -41,15 +41,16 @@
     "@types/react-dom": "^19.1.7",
     "@types/sql.js": "^1.4.9",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "sharp": "^0.33.5",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
-  "typescript-eslint": "^8.39.1",
-  "vite": "^7.1.2",
-  "vitest": "^2.1.4",
-  "sharp": "^0.33.5"
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2",
+    "vitest": "^2.1.4"
   }
 }
