@@ -1,3 +1,123 @@
+# Data Analyst Trainer
+
+<p align="left">
+  <a href="https://github.com/AbateG/data-analyst-trainer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/AbateG/data-analyst-trainer/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="https://codecov.io/gh/AbateG/data-analyst-trainer" ><img alt="Coverage" src="https://codecov.io/gh/AbateG/data-analyst-trainer/branch/main/graph/badge.svg?token=CODECOV_TOKEN_PLACEHOLDER" /></a>
+  <a href="https://github.com/AbateG/data-analyst-trainer/actions/workflows/deploy-pages.yml"><img alt="Pages Deploy" src="https://github.com/AbateG/data-analyst-trainer/actions/workflows/deploy-pages.yml/badge.svg" /></a>
+  <a href="https://github.com/AbateG/data-analyst-trainer/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/AbateG/data-analyst-trainer" /></a>
+  <a href="https://github.com/AbateG/data-analyst-trainer/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/AbateG/data-analyst-trainer?include_prereleases&label=latest" /></a>
+</p>
+
+<!-- Repo topics (add via GitHub UI or gh cli): training, data-engineering, sql, python, spaced-repetition -->
+<!-- Replace CODECOV_TOKEN_PLACEHOLDER in badge URL with real token only if private; public repos do not need it. -->
+
+An end‑to‑end interactive training environment for data & analytics engineers covering:
+
+- Practical SQL challenge harness with schema validation
+- Python execution sandbox via Pyodide (browser—no backend)
+- Conceptual free‑form answer evaluation (keyword + fuzzy scoring)
+- Spaced repetition surfacing weak concepts
+- Structured authoring & validation scripts for rapid challenge iteration
+
+The project started from a Vite + React + TypeScript seed and has grown into a focused learning platform. All logic runs locally/offline—ideal for self‑study or internal enablement.
+
+---
+
+## Quick Start
+
+```powershell
+git clone https://github.com/AbateG/data-analyst-trainer.git
+cd data-analyst-trainer
+npm ci
+npm run dev
+```
+Open http://localhost:5173/data-analyst-trainer/ (adjust if Vite picks a different port).
+
+### One‑liner validation & tests
+```powershell
+npm run validate:all
+npm test
+```
+
+## Scripts Overview
+
+| Script | Purpose |
+|--------|---------|
+| dev | Start Vite dev server |
+| build | Type check (project refs) then build production bundle |
+| lint | ESLint (0 warnings enforced in CI) |
+| test / test:watch | Vitest suites (conceptual evaluator, Python harness, SQL, Pyodide singleton) |
+| validate:challenges | Static validation of challenge metadata & shapes |
+| run:sql | Execute SQL challenges headlessly (sql.js) |
+| score / score:stdout | Produce progress JSON (for reports) |
+| validate:python / :runtime / :hints / :enhanced | Python manifest + runtime integrity checks |
+| report:failing-python | Summarize failing Python cases |
+| export:images | Generate optimized raster/ vector assets (via sharp) |
+| precommit:check | Aggregate pre-push hygiene (lint, types, etc.) |
+
+---
+
+## Architecture (High Level)
+
+| Area | Key Files | Notes |
+|------|-----------|-------|
+| Challenge Definitions | `src/challenges/*.ts` | SQL, Python, conceptual challenge catalogs & taxonomy |
+| Conceptual Evaluator | `src/challenges/conceptualEvaluator.ts` & engine mirror | Fuzzy term coverage & feedback model |
+| Python Runtime | `src/utils/pyodideSingleton.ts`, `src/components/PythonRunner.tsx` | Shared Pyodide instance prevents multi-load OOM |
+| SQL Validation | `src/engine/sqlValidation.ts` | Lightweight parser + identifier resolver |
+| Spaced Repetition | `src/challenges/spacedRepetition.ts` | Persistence via localStorage, schedules weak terms |
+| Engine Surface | `src/engine/*` | Future extraction / packaging boundary |
+
+Design goals:
+1. Deterministic local evaluation.
+2. Zero server dependency (Pages deploy only serves static assets).
+3. Extensible catalogs with automated validation.
+4. Friendly authoring feedback loops (fast scripts, no network).
+
+---
+
+## Release & Versioning
+
+Semantic-ish version tags (`vMAJOR.MINOR.PATCH`). Create a tag when you introduce a notable learner-facing feature set.
+
+Tag & push:
+```powershell
+git tag -a v0.3.0 -m "feat: public release with conceptual evaluator + spaced repetition"
+git push origin v0.3.0
+```
+
+Then optionally run the "Manual Release" workflow (Actions → Manual Release) supplying `v0.3.0` to generate a GitHub Release with notes.
+
+For next cycle planning, create a milestone:
+```powershell
+gh milestone create "v0.4.0" --description "Roadmap: expanded evaluator synonyms, streaming challenges, coverage improvements"
+```
+Assign or create issues under that milestone to track roadmap items.
+
+---
+
+## Contributing
+
+Small, focused PRs welcome:
+1. Open an issue (or reference an existing enhancement idea).
+2. Run `npm ci && npm test && npm run validate:all` before opening PR.
+3. Ensure new challenge definitions have validation coverage.
+4. Add/update docs in `README.md` or `docs/` when altering user-visible behavior.
+
+### Coding Standards
+- TypeScript strictness enforced via build scripts.
+- Prefer small pure utilities over sprawling stateful modules.
+- Keep challenge data immutable (treat definitions as read-only at runtime).
+- Avoid adding heavy dependencies—edge logic should stay lightweight & transparent.
+
+### Commit Conventions
+Informal Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`) keep CHANGELOG approachable.
+
+---
+
+## Original Template Attribution
+Started from Vite React TypeScript template (see below for original guidance). Retained for context/reference.
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

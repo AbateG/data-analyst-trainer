@@ -25,7 +25,22 @@ export default defineConfig({
     // Optimize test execution
     testTimeout: 30000,
     coverage: {
-      enabled: false
+      enabled: true,
+      reporter: ['text', 'lcov'],
+      reportsDirectory: './coverage',
+      provider: 'v8',
+      exclude: [
+        'src/**/types.ts',
+        'src/**/index.ts',
+        'src/**/__tests__/**',
+        'src/**/*.d.ts'
+      ],
+      thresholds: {
+        lines: 65,
+        functions: 65,
+        statements: 65,
+        branches: 55
+      }
     },
     // Run tests in isolated environments
     isolate: true,
