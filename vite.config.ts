@@ -10,6 +10,7 @@ const base = explicit ? explicit : `/${repoName}/`
 export default defineConfig({
   plugins: [react()],
   base,
+  cacheDir: 'node_modules/.vite',
   resolve: {
     alias: {
       '@engine': '/src/engine'
@@ -28,10 +29,8 @@ export default defineConfig({
         }
       }
     },
-    // Enable build caching
-    watch: {
-      include: ['src/**', 'public/**']
-    }
+  // Avoid dev-only watch settings in CI
+  chunkSizeWarningLimit: 1500
   },
   // Enable dependency pre-bundling for faster dev server
   optimizeDeps: {
