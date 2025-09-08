@@ -45,7 +45,12 @@ const Navbar: React.FC = () => {
           </NavLink>
         </li>
         <li>
-          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle color theme">
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label="Toggle color theme"
+            aria-pressed={theme === 'dark' ? 'true' : 'false'}
+          >
             {theme === 'dark' ? '🌙' : '☀️'}
           </button>
         </li>
