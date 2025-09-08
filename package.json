@@ -20,7 +20,8 @@
   "export:images": "ts-node --esm ./scripts/exportImages.ts",
   "report:failing-python": "ts-node --esm ./scripts/reportPythonFailures.ts",
   "validate:python": "ts-node --esm ./scripts/validatePythonChallenges.ts",
-  "validate:python:runtime": "ts-node --esm ./scripts/validatePythonRuntime.ts"
+  "validate:python:runtime": "ts-node --esm ./scripts/validatePythonRuntime.ts",
+  "build:engine": "tsc -p tsconfig.engine.json --noEmit"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

@@ -38,5 +38,6 @@ Focus: Foundation for richer Python/SQL authoring, evaluation robustness, and of
 - Expand synonym / semantic mapping in conceptual evaluator.
 - Persist spaced repetition state to exportable profile.
 - Add CI coverage reports & badges.
+- Engine scaffolding: introduced `src/engine` with `sqlValidation` module, barrel export, path alias `@engine/*`, and dedicated `tsconfig.engine.json` + `build:engine` script.
 
 [0.2.0]: https://github.com/AbateG/data-analyst-trainer/releases/tag/v0.2.0
