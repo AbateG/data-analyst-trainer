@@ -2,14 +2,14 @@
 
 <p align="left">
   <a href="https://github.com/AbateG/data-analyst-trainer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/AbateG/data-analyst-trainer/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://codecov.io/gh/AbateG/data-analyst-trainer" ><img alt="Coverage" src="https://codecov.io/gh/AbateG/data-analyst-trainer/branch/main/graph/badge.svg?token=CODECOV_TOKEN_PLACEHOLDER" /></a>
+  <a href="https://codecov.io/gh/AbateG/data-analyst-trainer" ><img alt="Coverage" src="https://codecov.io/gh/AbateG/data-analyst-trainer/branch/main/graph/badge.svg" /></a>
   <a href="https://github.com/AbateG/data-analyst-trainer/actions/workflows/deploy-pages.yml"><img alt="Pages Deploy" src="https://github.com/AbateG/data-analyst-trainer/actions/workflows/deploy-pages.yml/badge.svg" /></a>
   <a href="https://github.com/AbateG/data-analyst-trainer/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/AbateG/data-analyst-trainer" /></a>
   <a href="https://github.com/AbateG/data-analyst-trainer/releases"><img alt="Releases" src="https://img.shields.io/github/v/release/AbateG/data-analyst-trainer?include_prereleases&label=latest" /></a>
 </p>
 
 <!-- Repo topics (add via GitHub UI or gh cli): training, data-engineering, sql, python, spaced-repetition -->
-<!-- Replace CODECOV_TOKEN_PLACEHOLDER in badge URL with real token only if private; public repos do not need it. -->
+<!-- Codecov badge does not require a token for public repos. -->
 
 An end‑to‑end interactive training environment for data & analytics engineers covering:
 
