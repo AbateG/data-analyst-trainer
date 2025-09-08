@@ -1,12 +1,43 @@
-import { adaptManifestToLegacy, pythonManifestChallenges } from './loaderPythonManifests';
+import { adaptManifestToLegacy, pythonManifestChallenges } from './loaderPythonManifests.ts';
+import type { PythonChallenge } from './types.ts';
 
-export const pythonChallenges = [
+// Helper: auto-generate progressive hints for legacy challenges (pre-manifest) if absent.
+function generateHints(ch: Omit<PythonChallenge,'hints'> & { hints?: PythonChallenge['hints'] }): PythonChallenge['hints'] {
+    if (ch.hints && ch.hints.length) return ch.hints;
+    const base: { level:number; text:string }[] = [];
+    // Level 1: high-level objective restatement
+    if (ch.objective) base.push({ level:1, text: ch.objective.replace(/^[A-Z]/, m=>m.toUpperCase()) });
+    else base.push({ level:1, text: 'Restate the problem in your own words first.' });
+    // Level 2: structural prompt
+    if (/list|records|data/i.test(ch.question)) base.push({ level:2, text:'Iterate once over the data structure collecting needed info.' });
+    else base.push({ level:2, text:'Identify core inputs and the single transformation required.' });
+    // Level 3: edge/pitfall guidance
+    base.push({ level:3, text:'Handle edge cases explicitly (empty collections, missing keys, or invalid values).' });
+    // Level 4: implementation detail
+    base.push({ level:4, text:'Build a new result object rather than mutating inputs in-place unless specified.' });
+    // Level 5: final assembly / output normalization
+    base.push({ level:5, text:'Return or print output matching the exact expected structure/order.' });
+    return base;
+}
+
+// Helper: derive a minimal example when none provided.
+function generateExamples(ch: PythonChallenge): PythonChallenge['examples'] {
+    if (ch.examples && ch.examples.length) return ch.examples;
+    // Heuristic: if data array present use first 1-2 entries
+    if (Array.isArray(ch.data) && ch.data.length) {
+        return [{ name: 'basic', description: 'Representative input subset', input: ch.data.slice(0, Math.min(2,ch.data.length)), printed: ch.expectedOutput?.split('\n').slice(-1)[0] }];
+    }
+    return [{ name:'basic', input: null, description:'Fill in example manually' }];
+}
+
+let legacyPythonChallenges: PythonChallenge[] = [
   {
     id: 1,
     category: 'data-cleaning',
     tags: ['python','validation','wrangling'],
     difficulty: 'beginner',
     objective: 'Filter, convert, and enrich messy API list data',
+    preface: `The entrypoint function is \`validate_and_clean(raw_data)\`. The \`raw_data\` variable, a list of dictionaries, is injected automatically. Your function should process this list based on the rules provided in the question.`,
     question: `You are given a list of dictionaries, representing data pulled from a messy API. Write a Python function \`validate_and_clean(data)\` that takes this list and does the following:
 1.  Returns a new list containing only the records that have both a \`user_id\` and a positive \`amount\`.
 2.  Converts the \`amount\` from a string to a float.
@@ -37,13 +68,14 @@ Invalid record: {'user_id': 102, 'amount': '-10.00'}
         {'user_id': 102, 'amount': '-10.00'},
         {'user_id': 103, 'amount': '19.99'}
     ]
-  },
+    },
   {
     id: 2,
     category: 'api-validation',
     tags: ['python','api','anomaly-detection','statistics'],
     difficulty: 'intermediate',
     objective: 'Validate JSON payload schema and detect outliers',
+    preface: `The entrypoint for this challenge is the \`validate_api_data(api_response)\` function. The \`api_response\` is a JSON string that will be passed to your function. Your script should parse this JSON, validate it, and identify any anomalies based on the criteria in the problem description.`,
     question: `Advanced Python Challenge: API Data Validation and Anomaly Detection
 Write a Python script that simulates validating API data and detecting anomalies. The script should:
 1. Parse JSON data from an API response
@@ -121,13 +153,14 @@ Record {'user_id': 104, 'amount': 15000.0}: Amount out of valid range
         {'user_id': 104, 'amount': 15000.00},
         {'user_id': 105, 'amount': 100.00}
     ]
-  },
+    },
   {
     id: 3,
     category: 'pipeline-debug',
     tags: ['python','diff','consistency'],
     difficulty: 'beginner',
     objective: 'Compare parallel source snapshots to locate drift',
+    preface: `The main function to implement is \`check_data_consistency(source1, source2, key_field)\`. The two data sources (\`source1\`, \`source2\`) and the \`key_field\` to join on are provided. Your function should compare the records and print any discrepancies found.`,
     question: `Python for Data Pipeline Debugging: Write a script to simulate checking data consistency across multiple sources. The script should compare data from two "sources" and identify mismatches.`,
     solution: `def check_data_consistency(source1, source2, key_field):
     mismatches = []
@@ -177,6 +210,7 @@ Record 4 missing in source1`,
     tags: ['python','statistics','clustering'],
     difficulty: 'intermediate',
     objective: 'Detect statistical anomalies and bucket similar values',
+    preface: `Your script will need to implement two functions: \`detect_anomalies(data)\` and \`simple_clustering(data, threshold=10)\`. The transaction data is provided. Your goal is to first identify statistical outliers and then group similar transactions together.`,
     question: `Advanced Python: Machine Learning for Anomaly Detection. Write a script that uses statistical methods to detect anomalies in transaction data, then implement a simple clustering algorithm to group similar transactions.`,
     solution: `import statistics
 from collections import defaultdict
@@ -239,6 +273,7 @@ Clusters: {100: [{'user_id': 1, 'amount': 100, 'product': 'A'}], 150: [{'user_id
     tags: ['python','validation','rules-engine'],
     difficulty: 'beginner',
     objective: 'Implement generic rule-driven record validator',
+    preface: `Implement the function \`run_sanity_checks(data, rules)\`. You'll be given a dataset and a dictionary of validation rules. Your function should iterate through the data, apply the rules, and report any records that fail validation.`,
     question: `Automated Sanity Checks: Write a Python function to automate sanity checks on a dataset. The function should take a list of records and a dictionary of rules, and return a list of records that fail validation, along with the reason.`,
     solution: `def run_sanity_checks(data, rules):
     failing_records = []
@@ -287,6 +322,7 @@ for failure in failures:
     tags: ['python','regex','logs'],
     difficulty: 'beginner',
     objective: 'Parse structured logs and extract error events',
+    preface: `The core task is to implement the \`parse_log_for_errors(log_data)\` function. You will be provided with a multi-line string of log data. Your function should parse this data to find and extract all 'ERROR' level messages.`,
     question: `Log File Analysis: Write a Python function to parse a log file and extract all 'ERROR' level messages. The function should return a list of dictionaries, each containing the timestamp, level, and message of the error.`,
     solution: `import re
 
@@ -323,6 +359,7 @@ for error in errors:
     tags: ['python','diff','records'],
     difficulty: 'beginner',
     objective: 'Reconcile user records between two sources',
+    preface: `Your task is to write the function \`reconcile_user_data(source1, source2)\`. You'll receive two lists of user records. Your function should compare them to find users that are unique to each source and those with conflicting email addresses.`,
     question: "Data Reconciliation: Write a Python function to reconcile data from two different sources. It should identify users present only in one source, and users present in both but with mismatched email addresses.",
     solution: `def reconcile_user_data(source1, source2):
     s1_map = {}
@@ -372,6 +409,7 @@ print(discrepancies)
     tags: ['python','api','pagination','validation'],
     difficulty: 'intermediate',
     objective: 'Simulate paginated API merge and detect missing pages',
+    preface: `Your goal is to implement the \`assemble_pages(pages)\` function. This function will receive a list of page objects. Your code should correctly assemble the records from these pages, identify any duplicate or missing page numbers, and print the results.`,
     question: `Paginated API Merge: You receive three pages of data (page number embedded). Some pages may be missing or duplicated. Write code to (1) assemble ordered records by page, (2) detect any missing or duplicate page numbers, (3) print issues then final combined list.`,
     solution: `def assemble_pages(pages):
     seen = set()
@@ -413,6 +451,7 @@ Missing pages: [2]
     tags: ['python','logs','correlation','tracing'],
     difficulty: 'intermediate',
     objective: 'Correlate request and error logs using request_id',
+    preface: `Implement the function \`correlate(requests, errors)\`. You will be given two lists of logs: one for requests and one for errors. Your function needs to join them by \`request_id\` and report on slow, failing requests and requests that have no corresponding error log.`,
     question: `Trace Correlation: Given request_logs and error_logs lists, join by request_id and print unresolved requests (no error) and errored requests with latency > 2000ms.`,
     solution: `# Pythonic correlation using comprehensions + direct iteration
 def correlate(requests, errors):
@@ -436,6 +475,7 @@ No error: request def` ,
     tags: ['python','etl','diff','data-quality'],
     difficulty: 'intermediate',
     objective: 'Compare full vs incremental snapshots and list unexpected deletions',
+    preface: `The function to create is \`snapshot_diff(full_snapshot, incr_snapshot)\`. You'll be provided with two lists of dictionaries representing a full data snapshot and an incremental one. Your task is to find which record IDs are missing from the incremental snapshot and which are new additions.`,
     question: `ETL Snapshot Diff: Given full_snapshot and incremental_snapshot lists of dicts keyed by id, list ids present in full but missing in incremental (unexpected deletion) and ids newly added.`,
     solution: `def snapshot_diff(full_snapshot, incr_snapshot):
     full_ids = {r['id'] for r in full_snapshot}
@@ -457,6 +497,7 @@ Added: [4]`,
     tags: ['python','metrics','zscore'],
     difficulty: 'intermediate',
     objective: 'Compute z-scores and flag metrics beyond threshold',
+    preface: `Your task is to write the function \`flag_z(points)\`. This function will receive a list of data points. You need to calculate the z-score for each point and print out any that have a z-score with an absolute value greater than 1.5.`,
     question: `Metric Z-Score Flagging: Given metric_points list of dicts with value, compute mean/std then print any value whose z-score absolute > 1.5.`,
     solution: `import math
 
@@ -486,6 +527,7 @@ flag_z(raw_data)
     tags: ['python','cost','aggregation'],
     difficulty: 'beginner',
     objective: 'Aggregate monthly cloud cost per service and flag overspending',
+    preface: `Implement the \`cost_aggregate(records)\` function. It will take a list of cost records. Your function should sum up the costs for the month of '2025-01' for each service and print any service with a total cost over $1000.`,
     question: `Cost Aggregation: Given cost_records(service, month, usd), aggregate totals for month 2025-01 and print services over 1000.`,
     solution: `from collections import defaultdict
 
@@ -510,6 +552,7 @@ Overspend dataproc $1200.0`,
     tags: ['python','partitions','dates'],
     difficulty: 'intermediate',
     objective: 'Detect unexpected future date partitions',
+    preface: `Write the function \`partition_drift(dates)\`. This function will be given a list of partition date strings. Your code should identify and print any partitions dated after '2025-02-10' and also report any gaps of more than two days between consecutive partitions.`,
     question: `Partition Drift: Given partition_dates list of date strings, print any date > max_date -  today logic simulated (assume today=2025-02-10) plus check for gaps >2 days between consecutive partitions.`,
     solution: `from datetime import datetime
 
@@ -541,6 +584,7 @@ Gap detected of 8 days after 2025-02-07`,
     tags: ['python','events','timing'],
     difficulty: 'intermediate',
     objective: 'Mark late events based on watermark cutoff',
+    preface: `Your job is to create the function \`mark_late(events, watermark)\`. You'll get a list of events and a watermark timestamp. Your function should print any events that occurred after the date of the watermark.`,
     question: `Late Event Marking: Given events(list of dicts with event_ts ISO string) and watermark='2025-02-01T23:59:59', print any events whose event_ts date > watermark date.`,
     solution: `from datetime import datetime
 
@@ -562,6 +606,7 @@ mark_late(raw_data['events'], raw_data['watermark'])
     tags: ['python','checksum','integrity'],
     difficulty: 'intermediate',
     objective: 'Recompute row checksums and list mismatches',
+    preface: `Implement the function \`check_checksums(rows)\`. You will be given a list of rows, each with a \`stored_checksum\`. Your function should recalculate the checksum based on the provided rule and print any rows where the stored and calculated checksums don't match.`,
     question: `Checksum Recompute: Each row dict has fields country, status, stored_checksum where checksum rule = f"{country}|{status}". Print rows whose stored_checksum mismatches rule.`,
     solution: `def check_checksums(rows):
     for r in rows:
@@ -580,6 +625,7 @@ check_checksums(raw_data)
     tags: ['python','caching','consistency'],
     difficulty: 'intermediate',
     objective: 'Detect stale cache entries vs source modification time',
+    preface: `Create the function \`cache_staleness(cache, source)\`. You'll receive two lists: one with cache entries and one with the current source versions. Your function should identify and print any cache keys that are stale or don't have a corresponding source entry.`,
     question: `Cache Staleness: Given cache_entries(key, cached_version, cached_ts) and source_versions(key, current_version, updated_ts), print keys where cached_version < current_version OR cached_ts older than updated_ts.`,
     solution: `def cache_staleness(cache, source):
     sv = {}
@@ -606,6 +652,7 @@ Stale: user:3`,
     tags: ['python','mapping','rules'],
     difficulty: 'beginner',
     objective: 'Validate derived user tier values from spend rules',
+    preface: `Your task is to write the function \`validate_tiers(spend_records, derived_tiers)\`. You will be given spend records and a list of derived user tiers. Your function should check if the tiers correctly correspond to the spend rules and print any mismatches.`,
     question: `Tier Mapping Validation: Given spend_records(user_id, spend) and derived_tiers(user_id, tier) ensure tiers follow rules (<100 bronze, <500 silver else gold). Print mismatches.`,
     solution: `def validate_tiers(spend_records, derived_tiers):
     tier_map = {}
@@ -628,6 +675,7 @@ validate_tiers(raw_data['spend_records'], raw_data['derived_tiers'])
     tags: ['python','time','sessions'],
     difficulty: 'advanced',
     objective: 'Compute session counts with 30m timeout',
+    preface: `Implement the function \`session_counts(events)\`. You'll receive a list of user events sorted by time. Your function should count the number of sessions for each user, where a new session starts after a 30-minute period of inactivity.`,
     question: `Sessionization: Given events sorted by timestamp for multiple users, start new session if gap > 1800 seconds. Print user_id -> session_count.`,
     solution: `from datetime import datetime
 
@@ -655,6 +703,7 @@ session_counts(raw_data)
     tags: ['python','graph','dependencies'],
     difficulty: 'intermediate',
     objective: 'Build simple DAG adjacency from task specs',
+    preface: `Your goal is to write the \`build_dag(tasks)\` function. Given a list of tasks with dependencies, your function should construct and print an adjacency list representing the task graph and also identify and print the root tasks.`,
     question: `Flow Mapping: Given tasks list with id and depends_on (list) build adjacency list (task -> children) and print tasks with no dependencies (roots).`,
     solution: `def build_dag(tasks):
     deps = {}
@@ -684,6 +733,7 @@ Adjacency: {'extract': ['transform'], 'transform': ['load'], 'load': []}`,
     tags: ['python','diff','headers'],
     difficulty: 'beginner',
     objective: 'Compare CSV header vs expected schema fields',
+    preface: `Implement the function \`header_diff(expected, actual)\`. You will be given two lists of column names. Your function should compare them and print any columns that are missing from the actual list and any extra columns that are present.`,
     question: `CSV Header Validation: Given expected list of columns and actual_columns list, print missing and extra column names.`,
     solution: `def header_diff(expected, actual):
     missing = []
@@ -710,6 +760,7 @@ Extra: ['legacy_flag']`,
     tags: ['python','reconciliation','billing'],
     difficulty: 'intermediate',
     objective: 'Match invoices to payments and show discrepancies',
+    preface: `Write the function \`reconcile(invoices, payments)\`. You'll get two lists, one of invoices and one of payments. Your function should find and print any invoices where the amount does not match the settled amount in the corresponding payment.`,
     question: `Billing Reconciliation: Given invoices(list of dict id, amount) and payments(id, settled_amount) print any id where rounded amounts differ.`,
     solution: `def reconcile(invoices, payments):
     pay_map = {}
@@ -731,6 +782,7 @@ reconcile(raw_data['invoices'], raw_data['payments'])
     tags: ['python','validation','nulls'],
     difficulty: 'beginner',
     objective: 'Count nulls per key field',
+    preface: `Your task is to implement the \`null_counts(rows)\` function. Given a list of rows, your function should count and print the number of times \`user_id\` is null and the number of times \`event_type\` is null.`,
     question: `Null Counter: Given rows(list) count how many have user_id None and how many have event_type None.`,
     solution: `def null_counts(rows):
     missing_user = 0
@@ -754,6 +806,7 @@ null_counts(raw_data)
     tags: ['python','statistics','percentile'],
     difficulty: 'intermediate',
     objective: 'Compute approximate p95 latency',
+    preface: `Implement the function \`p95(values)\`. You will be given a list of latency values. Your function should calculate and print the 95th percentile latency from this list.`,
     question: `Latency P95: Given list of ms values compute p95 by sorting and selecting ceil(n*0.95)-1 index.`,
     solution: `import math
 
@@ -773,6 +826,7 @@ p95(raw_data)
     tags: ['python','logs','filter'],
     difficulty: 'beginner',
     objective: 'Filter slow queries over threshold',
+    preface: `Write the function \`slow(logs)\`. You'll be given a list of query logs. Your function should filter these logs to find queries that took longer than 2000ms to execute and print them in descending order of duration.`,
     question: `Slow Queries: Given logs(list dict query_id,duration_ms) print entries with duration_ms>2000 sorted desc.`,
     solution: `def slow(logs):
     for r in sorted([l for l in logs if l['duration_ms']>2000], key=lambda x: x['duration_ms'], reverse=True):
@@ -790,6 +844,7 @@ slow(raw_data)
     tags: ['python','graph','dfs'],
     difficulty: 'intermediate',
     objective: 'Expand descendants from root',
+    preface: `Your task is to create the function \`descendants(edges, root)\`. You will be given a list of edges representing a directed graph and a root node. Your function should find and print all nodes that are descendants of the root.`,
     question: `Lineage: Given edges(list of (parent,child)), produce sorted unique children reachable from root 'raw_events'.`,
     solution: `def descendants(edges, root):
     graph = {}
@@ -818,6 +873,7 @@ descendants(raw_data, 'raw_events')
     tags: ['python','dates','gaps'],
     difficulty: 'beginner',
     objective: 'List missing dates from expected sequence',
+    preface: `Implement the function \`missing(dates)\`. You'll be given a list of date strings. Your function should identify and print any dates that are missing from the expected continuous sequence from '2025-03-01' to '2025-03-05'.`,
     question: `Date Gap: Given dates list expect 2025-03-01..2025-03-05 inclusive; print missing.`,
     solution: `from datetime import datetime, timedelta
 
@@ -845,6 +901,7 @@ missing(raw_data)
     tags: ['python','sorting','ranking'],
     difficulty: 'beginner',
     objective: 'Rank items per day',
+    preface: `Write the function \`rank_sales(sales)\`. You will be given a list of sales data. Your function should rank the products by revenue for each day and print the ranked list.`,
     question: `Ranking: Given sales list dict product, day, revenue produce list of tuples (product,day,revenue,rank) with dense rank per day.`,
     solution: `def rank_sales(sales):
     from collections import defaultdict
@@ -874,6 +931,7 @@ rank_sales(raw_data)
     tags: ['python','cohort','retention'],
     difficulty: 'intermediate',
     objective: 'Count retained users within window',
+    preface: `Your task is to implement the \`retained(signups, logins)\` function. You'll receive lists of signup and login events. Your function should count how many users who signed up on '2025-05-01' logged in again within the following 7 days.`,
     question: `Retention: Given signups list and logins list, count signups on 2025-05-01 with login again within 7 days (exclude same day).`,
     solution: `from datetime import datetime
 
@@ -902,6 +960,7 @@ retained(raw_data['signups'], raw_data['logins'])
     tags: ['python','funnel','conversion'],
     difficulty: 'intermediate',
     objective: 'Compute conversion ratios',
+    preface: `Implement the function \`funnel(events)\`. You will be given a list of events representing a conversion funnel. Your function should calculate and print the number of users at each step of the funnel and the conversion rate from the previous step.`,
     question: `Funnel Conversion: For events list with steps VIEW,CART,PURCHASE produce counts per step and conversion to previous (rounded 2).`,
     solution: `def funnel(events):
     steps = ['VIEW','CART','PURCHASE']
@@ -934,6 +993,7 @@ funnel(raw_data)
     tags: ['python','fx','validation'],
     difficulty: 'intermediate',
     objective: 'Validate FX math',
+    preface: `Write the function \`fx_validate(rates, sales)\`. You'll be given lists of FX rates and sales data. Your function should validate the currency conversion math and print any sales where the recorded USD amount doesn't match the calculated amount within a tolerance.`,
     question: `FX Math: Given rates list and sales list recompute amount_original*rate_to_usd and print mismatches tolerance 0.01.`,
     solution: `def fx_validate(rates, sales):
     rate_map = {(r['day'], r['currency']): r['rate_to_usd'] for r in rates}
@@ -956,6 +1016,7 @@ fx_validate(raw_data['rates'], raw_data['sales'])
     tags: ['python','aws','boto3','cloud'],
     difficulty: 'intermediate',
     objective: 'Simulate using a cloud SDK to retag resources for reprocessing',
+    preface: `Your script will simulate using a cloud SDK to manage resource tags. You are provided with a list of failed S3 object keys and a mock 'boto3' client. Your task is to implement the logic to retag these objects for reprocessing based on their current tags.`,
     question: `Cloud SDK Simulation: You are given a list of S3 object keys that failed to be processed. Write a Python script that simulates using 'boto3' to (1) get the tags for each object, (2) check if the 'processed' tag is 'False', and (3) for those objects, retags them with 'needs_reprocessing=True'. Use the provided mock functions.`,
     solution: `
 # --- Mock Boto3 Client (provided for simulation) ---
@@ -1146,6 +1207,19 @@ print(extract_purchases(raw_data))
         data: []
     }
 ];
-// Append adapted manifest-based challenges (progressive migration)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(pythonChallenges as any).push(...pythonManifestChallenges.map(adaptManifestToLegacy as any));
+
+legacyPythonChallenges = legacyPythonChallenges.map(c => ({ ...c, hints: generateHints(c), examples: generateExamples(c) }));
+
+export const pythonChallenges: PythonChallenge[] = [
+    ...legacyPythonChallenges,
+    // Adapt new manifest-based challenges into legacy shape (will already include richer hints/examples)
+    ...pythonManifestChallenges.map(m => {
+        const adapted = adaptManifestToLegacy(m) as unknown as PythonChallenge;
+        // Ensure validation target for metadata tests: if no expectedOutput/pattern, synthesize from first example or evaluation mode
+        if(!adapted.expectedOutput && !(adapted as any).expectedPattern){
+            adapted.expectedOutput = (m.examples && m.examples[0] && typeof m.examples[0].output !== 'undefined') ? JSON.stringify(m.examples[0].output) : '';
+        }
+        return adapted;
+    })
+];
+// (Removed previous duplicate push of manifest challenges causing id duplication)

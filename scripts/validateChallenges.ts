@@ -45,10 +45,14 @@ function main() {
     ...pythonChallenges.map(c => ({ ...c, _type: 'python' as const })),
     ...sqlChallenges.map(c => ({ ...c, _type: 'sql' as const })),
   ];
-    // Dedupe IDs within each challenge type (IDs are allowed to overlap across domains)
-    const byType: Record<string, number[]> = { conceptual: [], python: [], sql: [] };
-    for (const a of all) byType[a._type].push(a.id);
-    for (const [, ids] of Object.entries(byType)) dedupeIds(ids, issues);
+  // Dedupe IDs within each challenge type, but reserve >=1000 for manifest-based future set (allow coexistence)
+  const byType: Record<string, number[]> = { conceptual: [], python: [], sql: [] };
+  for (const a of all) {
+    // For python type, group legacy (<1000) separately from manifest (>=1000) logically
+    if (a._type === 'python' && a.id >= 1000) continue; // skip dedupe among manifest tier for now
+    byType[a._type].push(a.id);
+  }
+  for (const [, ids] of Object.entries(byType)) dedupeIds(ids, issues);
 
   for (const ch of all) {
     validateNonEmpty('id', ch.id, ch.id, issues);

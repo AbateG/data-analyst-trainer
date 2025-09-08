@@ -21,7 +21,9 @@
   "report:failing-python": "ts-node --esm ./scripts/reportPythonFailures.ts",
   "validate:python": "ts-node --esm ./scripts/validatePythonChallenges.ts",
   "validate:python:runtime": "ts-node --esm ./scripts/validatePythonRuntime.ts",
-  "build:engine": "tsc -p tsconfig.engine.json --noEmit"
+  "validate:python:hints": "ts-node --esm ./scripts/validatePythonHints.ts",
+  "build:engine": "tsc -p tsconfig.engine.json --noEmit",
+  "validate:python:enhanced": "ts-node --esm ./scripts/validateEnhancedPythonChallenges.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

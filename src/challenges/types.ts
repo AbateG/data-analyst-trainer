@@ -27,12 +27,16 @@ export interface SqlChallenge extends BaseChallengeMeta {
 }
 
 export interface PythonChallenge extends BaseChallengeMeta {
+  preface?: string;            // contextual setup guide for the challenge
   expectedOutput?: string;     // stdout comparison target
   data?: any;                  // injected raw data object
   skipVerification?: boolean;  // skip automated verification
   expectedPattern?: string;    // regex pattern for flexible output matching
   strictComparison?: boolean;  // require exact string match vs trimmed comparison
   heavy?: boolean;             // mark as heavy (excluded from default quick validation passes)
+  // Progressive guidance (legacy challenges can be auto-enriched)
+  hints?: { level:number; text:string }[]; // ascending specificity
+  examples?: { name:string; description?:string; input:any; output?:any; printed?:string }[]; // illustrative usage
 }
 
 export type Challenge = SqlChallenge | PythonChallenge;

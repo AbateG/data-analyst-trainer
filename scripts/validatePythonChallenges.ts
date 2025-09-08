@@ -5,7 +5,7 @@
   - Determinism heuristic: warn if solution contains datetime.utcnow(), random, time.time(), uuid4()
   - Security heuristic: error if forbidden imports (os, sys, subprocess, urllib, requests, open()
 */
-import { pythonChallenges } from '../src/challenges/python';
+import { pythonChallenges } from '../src/challenges/python.ts';
 import type { PythonChallenge } from '../src/challenges/types.ts';
 
 interface Issue { level:'ERROR'|'WARN'; id?:number; msg:string }

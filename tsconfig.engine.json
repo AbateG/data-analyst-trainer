@@ -2,9 +2,7 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "composite": false,
-    "noEmit": true,
-    "rootDir": "./src/engine",
-    "isolatedDeclarations": true
+    "noEmit": true
   },
   "include": ["src/engine/**/*"]
 }

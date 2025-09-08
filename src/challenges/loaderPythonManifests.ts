@@ -1,7 +1,6 @@
-import snapshotDiff from './python_manifests/snapshot_diff.json';
 import type { PythonChallengeManifest } from '../types/pythonChallengeManifest';
+import snapshotDiff from './python_manifests/snapshot_diff.ts';
 
-// Potentially later: dynamic import via import.meta.glob. For now static import for example.
 export const pythonManifestChallenges: PythonChallengeManifest[] = [snapshotDiff as PythonChallengeManifest];
 
 // Adapter: convert manifest into legacy challenge object shape for current UI/runner while we incrementally migrate.

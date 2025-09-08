@@ -148,7 +148,45 @@ const PythonRunner: React.FC<PythonRunnerProps> = ({ challenge }) => {
 
   return (
     <div className="python-runner">
+      {challenge.preface && <p style={{ whiteSpace: 'pre-wrap', fontStyle: 'italic', background: '#2a2a2a', padding: '0.5rem', borderRadius: '4px' }}>{challenge.preface}</p>}
       <p style={{ whiteSpace: 'pre-wrap' }}>{challenge.question}</p>
+      {/* Guidance panel (for manifest-backed challenges) */}
+      {manifest && manifest.guidance && (
+        <details style={{marginBottom:'0.5rem'}} open>
+          <summary style={{cursor:'pointer', fontWeight:600}}>Guidance</summary>
+          <div style={{fontSize:'0.7rem', lineHeight:1.4}}>
+            {manifest.guidance.overview && <p style={{margin:'0.25rem 0'}}>{manifest.guidance.overview}</p>}
+            {manifest.guidance.functionSignature && (
+              <pre style={{background:'#111',color:'#ddd',padding:'0.4rem',overflowX:'auto'}}><code>{manifest.guidance.functionSignature}</code></pre>
+            )}
+            {(manifest.guidance.inputDescription || manifest.guidance.outputDescription) && (
+              <ul style={{margin:'0.25rem 0 0.4rem 1rem', padding:0}}>
+                {manifest.guidance.inputDescription && <li><strong>Inputs:</strong> {manifest.guidance.inputDescription}</li>}
+                {manifest.guidance.outputDescription && <li><strong>Output:</strong> {manifest.guidance.outputDescription}</li>}
+              </ul>
+            )}
+            {manifest.guidance.edgeCases?.length>0 && (
+              <div style={{marginTop:'0.25rem'}}>
+                <em>Edge Cases:</em>
+                <ul style={{margin:'0.15rem 0 0 1rem'}}>
+                  {manifest.guidance.edgeCases.map((e:string,i:number)=>(<li key={i}>{e}</li>))}
+                </ul>
+              </div>
+            )}
+            {manifest.guidance.pitfalls?.length>0 && (
+              <div style={{marginTop:'0.25rem'}}>
+                <em>Common Pitfalls:</em>
+                <ul style={{margin:'0.15rem 0 0 1rem'}}>
+                  {manifest.guidance.pitfalls.map((p:string,i:number)=>(<li key={i}>{p}</li>))}
+                </ul>
+              </div>
+            )}
+            {manifest.guidance.complexityHint && (
+              <p style={{margin:'0.4rem 0 0 0', fontStyle:'italic'}}>Complexity Hint: {manifest.guidance.complexityHint}</p>
+            )}
+          </div>
+        </details>
+      )}
       {/* Skip verification notice */}
       {challenge.skipVerification && (
         <div style={{background:'#222',color:'#bbb',padding:'0.5rem',border:'1px solid #444',fontSize:'0.7rem',marginBottom:'0.5rem'}}>
@@ -163,19 +201,19 @@ const PythonRunner: React.FC<PythonRunnerProps> = ({ challenge }) => {
       {challenge.objective && <p><em>Objective: {challenge.objective}</em></p>}
       {challenge.category && <p style={{fontSize:'0.8rem', opacity:0.7}}>Category: {challenge.category} {challenge.difficulty ? ' | ' + challenge.difficulty : ''}</p>}
       {/* Hints placeholder: if question contains "Hints:" section we could parse in future; for now show starter presence */}
-      {manifest && manifest.hints?.length > 0 && (
+      {(manifest && manifest.hints?.length > 0 || challenge.hints?.length > 0) && (
         <details>
-          <summary>Hints ({manifest.hints.length})</summary>
+          <summary>Hints ({manifest?.hints?.length || challenge.hints?.length})</summary>
           <ol style={{fontSize:'0.75rem', marginLeft:'1rem'}}>
-            {manifest.hints.sort((a:any,b:any)=>a.level-b.level).map((h:any)=>(<li key={h.level}>{h.text}</li>))}
+            {(manifest?.hints || challenge.hints).sort((a:any,b:any)=>a.level-b.level).map((h:any)=>(<li key={h.level}>{h.text}</li>))}
           </ol>
         </details>
       )}
-      {manifest && manifest.examples?.length > 0 && (
+      {(manifest && manifest.examples?.length > 0 || challenge.examples?.length > 0) && (
         <details>
-          <summary>Examples ({manifest.examples.length})</summary>
+          <summary>Examples ({(manifest?.examples?.length || challenge.examples?.length)})</summary>
           <div style={{fontSize:'0.7rem'}}>
-            {manifest.examples.map((ex:any,i:number)=>(
+            {(manifest?.examples || challenge.examples).map((ex:any,i:number)=>(
               <pre key={i} style={{background:'#111',color:'#ddd',padding:'0.4rem',overflowX:'auto'}}>
 {JSON.stringify(ex, null, 2)}
               </pre>

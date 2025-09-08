@@ -10,6 +10,11 @@ const base = explicit ? explicit : `/${repoName}/`
 export default defineConfig({
   plugins: [react()],
   base,
+  resolve: {
+    alias: {
+      '@engine': '/src/engine'
+    }
+  },
   build: {
     // Enable source maps for better debugging
     sourcemap: true,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { performIdentifierValidation } from '../../components/SqlRunner';
+import { performIdentifierValidation } from '@engine/sqlValidation';
 
 describe('performIdentifierValidation', () => {
   const tables = [

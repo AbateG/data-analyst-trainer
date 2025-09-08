@@ -49,7 +49,7 @@ describe('python runner enhancements', () => {
     const content = readFileSync(path, 'utf8');
   const hash = createHash('sha256').update(content).digest('hex').toUpperCase();
     // If this fails, update expected hash below intentionally.
-  const EXPECTED = 'A4BA86D0F3FF3CD74D05B491A3AF24F4EBC830CE8F47F0CAAB3E1E43DE2147C5';
+  const EXPECTED = '3D424DCF0F8DA48CC47821586E8ABD0E8E7D636FAE42B7EB389919A0501F6F4D';
     expect(hash).toBe(EXPECTED);
   });
 });

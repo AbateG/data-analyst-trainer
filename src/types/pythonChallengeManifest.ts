@@ -56,6 +56,45 @@ export interface PythonChallengeManifest {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   objective: string;           // concise objective
   narrative: string;           // full problem narrative (multi-paragraph allowed)
+  /**
+   * enhancedSpec: Rich pedagogical structure presented to user before code.
+   * All fields optional so we can progressively backfill. Validator script will enforce for new challenges.
+   */
+  enhancedSpec?: {
+    learningObjectives?: string[]; // 2-4 bullet verbs ("Compute", "Aggregate")
+    scenario?: string;             // Short motivating context variant if narrative is long
+    dataContext?: {
+      files?: { path: string; purpose?: string }[]; // Provided files tree subset
+      schema?: { name: string; type: string; description?: string; example?: any }[]; // Flattened schema description
+      invariants?: string[];       // e.g., 'ids unique within snapshot'
+    };
+    taskOverview?: string;         // One paragraph crisp "You will implement ..."
+    deliverableContract?: {
+      functions: { signature: string; description?: string; returns?: string; errors?: string[] }[];
+      performance?: string;        // e.g. O(n)
+      deterministic?: boolean;     // if outputs must be deterministic
+    };
+    evaluationCriteria?: {
+      categories?: { name: string; weight?: number; notes?: string }[];
+      hiddenTests?: { type: string; count?: number }[]; // meta info only
+    };
+    examples?: { title?: string; input: any; output?: any; note?: string }[]; // Optional richer examples separate from core examples field
+    constraints?: string[];        // Forbidden libs/actions or required patterns
+    hintsTiered?: string[][];      // Alternative simple hints structure (levels as arrays)
+    pitfalls?: string[];           // Common mistakes
+    extensions?: string[];         // Stretch goals
+    glossary?: { term: string; definition: string }[];
+  };
+  // --- Guidance additions (optional) to orient learners similar to SQL schema view ---
+  guidance?: {
+    overview?: string;              // high-level short orientation sentence(s)
+    functionSignature?: string;     // suggested starting function signature e.g. "def foo(x: int) -> str:"
+    inputDescription?: string;      // plain-language description of inputs
+    outputDescription?: string;     // plain-language description of output / side-effects
+    edgeCases?: string[];           // list of notable edge cases to consider
+    complexityHint?: string;        // guidance around expected complexity (lighter than contract.complexity)
+    pitfalls?: string[];            // common mistakes to avoid
+  };
   contract: {
     functionName?: string;     // optional primary function name
     description: string;       // high-level contract statement

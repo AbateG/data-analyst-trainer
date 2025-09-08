@@ -72,12 +72,45 @@ Use only if output includes ordering that is inherently nondeterministic or if m
 - Large embedded multi-MB data blobs.
 - Hidden state between challenges.
 
-## 14. Future Extensions (Roadmap)
+## 14. Hints & Examples (Progressive Guidance)
+All Python challenges now support progressive `hints` and illustrative `examples`.
+
+Hints follow ascending specificity:
+1. Conceptual orientation (what problem space is this?)
+2. Structural approach (data structures / iteration strategy)
+3. Edge cases / pitfalls
+4. Implementation direction (mutation vs pure, ordering, validation nuance)
+5. Final assembly / output shape / formatting expectations
+
+Authoring Rules:
+- Provide at least 3 hints (up to 5). Keep each under ~120 chars.
+- Avoid giving away full variable names or final code in early levels.
+- Level numbers must be strictly increasing starting at 1.
+
+Examples (`examples[]` objects) show realistic minimal IO. For print-style challenges include a `printed` field with the expected final line (or the core meaningful line) to reinforce pattern recognition.
+
+Minimum: 1 example. Prefer 2–3 when edge cases matter.
+
+Auto-Enrichment:
+- Legacy (pre-manifest) challenges without hints/examples are auto-enriched at load with generic scaffolding. You should still replace those with authored domain-specific hints to maximize learner value.
+- Validation (`npm run validate:python:hints`) fails if authored challenges have <3 hints or zero examples.
+
+Recommended Example Fields:
+```
+{
+  name: 'basic',
+  description: 'Happy path with one anomaly',
+  input: {...} | [...],
+  output: {...},        // if function-return style
+  printed: 'Mismatch: x vs y' // if print-mode
+}
+```
+
+## 15. Future Extensions (Roadmap)
 - Metadata field `learning_points[]` summarizing 2-3 key takeaways.
-- Optional `hints` array.
 - Difficulty auto-scorer derived from static analysis (loops, branching, concepts).
 
-## 15. Example Minimal Pattern Challenge
+## 16. Example Minimal Pattern Challenge
 ```
 {
   id: 99,

@@ -15,15 +15,121 @@
 .diff-view {
     font-family: monospace;
     margin-top: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     overflow: auto;
     max-height: 240px;
-    background: #fff;
+    background: #111;
+    color: #eee;
 }
 .diff-line { padding: 0 0.5rem; line-height: 1.25rem; white-space: pre; }
-.diff-line.added { background: #e6ffed; color: #22863a; }
-.diff-line.removed { background: #ffeef0; color: #b31d28; }
-.diff-line.unchanged { color: #444; opacity: 0.75; }
+.diff-line.added { background: #12381f; color: #56d364; }
+.diff-line.removed { background: #3d1e23; color: #ff7b72; }
+.diff-line.unchanged { color: #bbb; opacity: 0.8; }
 .diff-controls { display:flex; gap:0.5rem; margin:0.5rem 0; align-items:center; }
 .diff-controls button { font-size:0.7rem; padding:0.2rem 0.5rem; }
+
+/* Dark panel utility: ensure text is white for readability */
+.python-runner pre,
+.python-runner code,
+.python-runner .dark-panel,
+.python-runner details[open] pre,
+.python-runner details[open] code {
+    color: #fff !important;
+}
+
+/* Specific inline dark backgrounds used in component (#111, #222, #2a2a2a, #444 wrappers) */
+.python-runner pre[style*='background:#111'],
+.python-runner pre[style*='background:#222'],
+.python-runner pre[style*='background: #111'],
+.python-runner pre[style*='background: #222'],
+.python-runner p[style*='background:#2a2a2a'],
+.python-runner span[style*='background:#444'],
+.python-runner div[style*='background:#222'],
+.python-runner div[style*='background:#111'] {
+    color: #fff !important;
+}
+
+/* Badges readability */
+.python-runner span[style*='background:#444'] { color:#fff !important; }
+
+/* Skip verification notice readability */
+.python-runner div[style*='background:#222'] { color:#fff !important; }
+
+/* Guidance summary text color on dark backgrounds */
+.python-runner summary { color: var(--secondary-color, #4fa3ff); }
+
+/* -------- Dark panel contrast outside .python-runner (Challenge cards) -------- */
+.challenge-card [style*='background:#111'],
+.challenge-card [style*='background:#222'],
+.challenge-card [style*='background:#2a2a2a'],
+.challenge-card [style*='background:#444'],
+.challenge-card .dark-panel,
+.challenge-card .dark-bg,
+.challenge-card .instruction-panel,
+.challenge-card .challenge-intro,
+.challenge-card .challenge-header {
+    color:#fff !important;
+}
+
+.challenge-card .dark-panel,
+.challenge-card .dark-bg,
+.challenge-card .instruction-panel,
+.challenge-card .challenge-intro {
+    background:#222;
+}
+
+.challenge-card .dark-panel a,
+.challenge-card .instruction-panel a {
+    color:#7fc8ff;
+}
+
+.challenge-card code,
+.challenge-card pre {
+    color:#fff;
+}
+
+/* Contrast fix for dark instruction panels outside .python-runner */
+.challenge-card div[style*='background:#111'],
+.challenge-card div[style*='background:#222'],
+.challenge-card div[style*='background:#2a2a2a'],
+.challenge-card p[style*='background:#111'],
+.challenge-card p[style*='background:#222'],
+.challenge-card p[style*='background:#2a2a2a'],
+.challenge-card .instruction-panel,
+.challenge-card .challenge-intro,
+.challenge-card .dark-panel {
+    color:#fff !important;
+}
+
+/* --- Force readable text inside dark challenge intro / instruction panels --- */
+/* Use very strong selector + universal descendant to override earlier theme rules */
+.challenge-card .instruction-panel,
+.challenge-card .instruction-panel *,
+.challenge-card .challenge-intro,
+.challenge-card .challenge-intro *,
+.challenge-card .dark-panel,
+.challenge-card .dark-panel * {
+    color:#fff !important;
+}
+
+/* If the card wrapper class differs, replace .challenge-card with the real parent.
+   Temporary debug (uncomment if needed):
+   .instruction-panel { outline:1px solid magenta; }
+*/
+
+/* Optional: ensure the panel background is consistent */
+.instruction-panel,
+.challenge-intro,
+.dark-panel {
+    background:#222
+}
+
+/* Utility classes (use these instead of inline styles if you can) */
+.dark-panel,
+.dark-bg {
+    background:#222;
+    color:#fff;
+}
+.dark-panel a { color:#7fc8ff; }
+
