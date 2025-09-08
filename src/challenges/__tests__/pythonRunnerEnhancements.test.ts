@@ -46,10 +46,11 @@ describe('python runner enhancements', () => {
 
   it('CHALLENGE_AUTHORING.md content hash stable (update test if intentional change)', () => {
     const path = 'docs/CHALLENGE_AUTHORING.md';
-    const content = readFileSync(path, 'utf8');
-  const hash = createHash('sha256').update(content).digest('hex').toUpperCase();
-    // If this fails, update expected hash below intentionally.
-  const EXPECTED = '3D424DCF0F8DA48CC47821586E8ABD0E8E7D636FAE42B7EB389919A0501F6F4D';
+    // Normalize line endings so the hash is stable across OS (CRLF vs LF)
+    const content = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+    const hash = createHash('sha256').update(content).digest('hex').toUpperCase();
+    // If this fails, update expected hash below intentionally (after reviewing doc changes).
+    const EXPECTED = '35143D003ECA12E4D5604A32A5893E52EDC4C8496CC3C37BFE0CE6B887F97F5F';
     expect(hash).toBe(EXPECTED);
   });
 });
